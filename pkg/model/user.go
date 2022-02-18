@@ -11,7 +11,7 @@ type User struct {
 	FullName       string `json:"fullname"`
 	Email          string `json:"email"`
 	HashedPassword string `json:"password"`
-	isVerified     string `json:"isVerified"`
+	IsVerified     string `json:"isVerified"`
 }
 
 type UserUsecase interface {
