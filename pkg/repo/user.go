@@ -8,16 +8,16 @@ import (
 )
 
 type userRepository struct {
-	DB *gorm.DB
+	db *gorm.DB
 }
 
 func NewUserRepository(db *gorm.DB) model.UserRepository {
-	return &userRepository{DB: db}
+	return &userRepository{db: db}
 }
 
 func (m *userRepository) Insert(ctx context.Context, fullname, email, hashedPassword string) error {
 	user := model.User{FullName: fullname, Email: email, HashedPassword: hashedPassword, IsVerified: false}
-	result := m.DB.Create(&user)
+	result := m.db.Create(&user)
 	if result.Error != nil {
 		return result.Error
 	}
