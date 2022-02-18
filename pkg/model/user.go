@@ -9,7 +9,7 @@ import (
 type User struct {
 	gorm.Model
 	FullName       string `json:"fullname"`
-	Email          string `json:"email"`
+	Email          string `json:"email" gorm:"unique"`
 	HashedPassword string `json:"password"`
 	IsVerified     bool   `json:"isVerified"`
 }
