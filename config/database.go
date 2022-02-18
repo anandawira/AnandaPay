@@ -10,7 +10,7 @@ import (
 
 var DB *gorm.DB
 
-func Connect() {
+func Connect() *gorm.DB {
 	// Hardcore, later change to env variable
 	dsn := "root:example@tcp(127.0.0.1:3306)/anandapay?charset=utf8mb4&parseTime=True&loc=Local"
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
@@ -21,4 +21,5 @@ func Connect() {
 	db.AutoMigrate(&model.User{})
 
 	DB = db
+	return DB
 }
