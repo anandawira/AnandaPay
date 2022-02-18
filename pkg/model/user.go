@@ -15,7 +15,7 @@ type User struct {
 }
 
 type UserUsecase interface {
-	Register(ctx context.Context) error
+	Register(ctx context.Context, fullname, email, plainPassword string) error
 }
 
 type UserRepository interface {
