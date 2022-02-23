@@ -19,5 +19,5 @@ type UserUsecase interface {
 }
 
 type UserRepository interface {
-	Insert(ctx context.Context, fullname, email, hashedPassword string) error
+	Insert(ctx context.Context, fullname, email, hashedPassword string, isVerified bool) error
 }

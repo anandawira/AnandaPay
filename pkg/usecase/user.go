@@ -26,7 +26,7 @@ func (m *userUsecase) Register(c context.Context, fullname, email, plainPassword
 		return err
 	}
 
-	err = m.userRepo.Insert(ctx, fullname, email, string(hashedPassword))
+	err = m.userRepo.Insert(ctx, fullname, email, string(hashedPassword), false)
 	if err != nil {
 		return err
 	}
