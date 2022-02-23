@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"log"
 	"time"
 
 	"github.com/anandawira/anandapay/pkg/model"
@@ -23,7 +24,7 @@ func (m *userUsecase) Register(c context.Context, fullname, email, plainPassword
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(plainPassword), 14)
 	if err != nil {
-		return err
+		log.Fatal("Password hashing error", err.Error())
 	}
 
 	err = m.userRepo.Insert(ctx, fullname, email, string(hashedPassword), false)
