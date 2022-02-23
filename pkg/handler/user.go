@@ -23,7 +23,6 @@ func (h *userHandler) RegisterPost(c *gin.Context) {
 	err := c.ShouldBind(&reqBody)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"status":  "error",
 			"message": err.Error(),
 		})
 		return
@@ -33,12 +32,10 @@ func (h *userHandler) RegisterPost(c *gin.Context) {
 	err = h.userUsecase.Register(ctx, reqBody.Fullname, reqBody.Email, reqBody.Password)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"status":  "error",
 			"message": err.Error(),
 		})
 	} else {
 		c.JSON(http.StatusOK, gin.H{
-			"status":  "created",
 			"message": "User has been registered to the database.",
 		})
 	}
