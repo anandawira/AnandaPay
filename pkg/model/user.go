@@ -8,10 +8,10 @@ import (
 
 type User struct {
 	gorm.Model
-	FullName       string `json:"fullname"`
-	Email          string `json:"email" gorm:"unique"`
-	HashedPassword string `json:"password"`
-	IsVerified     bool   `json:"isVerified"`
+	FullName       string `json:"fullname" gorm:"not null"`
+	Email          string `json:"email" gorm:"unique,not null"`
+	HashedPassword string `json:"password" gorm:"not null"`
+	IsVerified     bool   `json:"isVerified" gorm:"not null"`
 }
 
 type UserUsecase interface {
