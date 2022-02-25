@@ -2,12 +2,11 @@ package repo
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"testing"
 
 	"github.com/anandawira/anandapay/pkg/model"
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -56,20 +55,29 @@ func (ts *UserRepoTestSuite) TestInsert() {
 		}
 
 		err := ts.repo.Insert(context.TODO(), user.FullName, user.Email, user.HashedPassword, user.IsVerified)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 	})
 
 	ts.T().Run("It should not insert to the database if email already exist.", func(t *testing.T) {
-		user := model.User{
+		const email string = "duplicate@gmail.com"
+		user1 := model.User{
+			FullName:       "User1",
+			Email:          email,
+			HashedPassword: "hashedPassword1",
+			IsVerified:     false,
+		}
+		user2 := model.User{
 			FullName:       "User2",
-			Email:          "email1@gmail.com",
+			Email:          email,
 			HashedPassword: "hashedPassword2",
 			IsVerified:     false,
 		}
-		err := ts.repo.Insert(context.TODO(), user.FullName, user.Email, user.HashedPassword, user.IsVerified)
-		fmt.Println(err)
-		// Check error
-		assert.Error(t, err)
+
+		err := ts.repo.Insert(context.TODO(), user1.FullName, user1.Email, user1.HashedPassword, user1.IsVerified)
+		require.NoError(t, err)
+
+		err = ts.repo.Insert(context.TODO(), user2.FullName, user2.Email, user2.HashedPassword, user2.IsVerified)
+		require.Error(t, err)
 	})
 }
 
