@@ -11,7 +11,7 @@ type UserHandler struct {
 	userUsecase model.UserUsecase
 }
 
-func NewUserHandler(g *gin.Engine, usecase model.UserUsecase) {
+func AttachHandler(g *gin.Engine, usecase model.UserUsecase) {
 	handler := &UserHandler{
 		userUsecase: usecase,
 	}
@@ -36,7 +36,7 @@ func (h *UserHandler) RegisterPost(c *gin.Context) {
 		})
 	} else {
 		c.JSON(http.StatusOK, gin.H{
-			"message": "User has been registered to the database.",
+			"message": "User registered to the database successfully.",
 		})
 	}
 }

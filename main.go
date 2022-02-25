@@ -13,15 +13,10 @@ import (
 func main() {
 	r := gin.Default()
 	db := config.Connect()
-	// r.GET("/ping", func(c *gin.Context) {
-	// 	c.JSON(200, gin.H{
-	// 		"message": "pong",
-	// 	})
-	// })
 
 	userRepo := repo.NewUserRepository(db)
 	userUsecase := usecase.NewUserUsecase(userRepo, time.Second*5)
-	handler.NewUserHandler(r, userUsecase)
+	handler.AttachHandler(r, userUsecase)
 
 	r.Run(":1234")
 }
