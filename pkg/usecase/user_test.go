@@ -12,17 +12,11 @@ import (
 
 type MockUserRepo struct {
 	mock.Mock
-	Emails map[string]bool
 }
 
 func (m *MockUserRepo) Insert(ctx context.Context, fullname, email, hashedPassword string, isVerified bool) error {
-	m.Called(ctx, fullname, email, hashedPassword, isVerified)
-	if m.Emails[email] {
-		return errors.New("Duplicate email address")
-	}
-
-	m.Emails[email] = true
-	return nil
+	args := m.Called(ctx, fullname, email, hashedPassword, isVerified)
+	return args.Error(0)
 }
 
 type UserUsecaseTestSuite struct {
@@ -32,14 +26,11 @@ type UserUsecaseTestSuite struct {
 }
 
 func (ts *UserUsecaseTestSuite) SetupSuite() {
-	ts.repo = &MockUserRepo{
-		Emails: make(map[string]bool),
-	}
+	ts.repo = new(MockUserRepo)
 	ts.usecase = NewUserUsecase(ts.repo, 5)
 }
 
 func (ts *UserUsecaseTestSuite) TestRegister() {
-	const email string = "useremail@gmail.com"
 	ts.T().Run("It should return true if user added to the database successfully.", func(t *testing.T) {
 
 		ts.repo.On(
@@ -54,7 +45,7 @@ func (ts *UserUsecaseTestSuite) TestRegister() {
 		err := ts.usecase.Register(
 			context.TODO(),
 			"fullname1",
-			email,
+			"useremail@gmail.com",
 			"password",
 		)
 
@@ -63,6 +54,25 @@ func (ts *UserUsecaseTestSuite) TestRegister() {
 	})
 
 	ts.T().Run("It should return false if email already exist.", func(t *testing.T) {
+		const email string = "duplicate@gmail.com"
+		ts.repo.On(
+			"Insert",
+			mock.Anything,
+			mock.AnythingOfType("string"),
+			mock.AnythingOfType("string"),
+			mock.AnythingOfType("string"),
+			mock.AnythingOfType("bool"),
+		).Return(nil).Once()
+
+		err := ts.usecase.Register(
+			context.TODO(),
+			"fullname1",
+			email,
+			"password2",
+		)
+		ts.Assertions.NoError(err)
+		ts.repo.AssertExpectations(t)
+
 		ts.repo.On(
 			"Insert",
 			mock.Anything,
@@ -72,11 +82,11 @@ func (ts *UserUsecaseTestSuite) TestRegister() {
 			mock.AnythingOfType("bool"),
 		).Return(errors.New("Duplicate email address")).Once()
 
-		err := ts.usecase.Register(
+		err = ts.usecase.Register(
 			context.TODO(),
-			"fullname1",
+			"fullname2",
 			email,
-			"password",
+			"password2",
 		)
 		ts.Assertions.Error(err)
 		ts.repo.AssertExpectations(t)
