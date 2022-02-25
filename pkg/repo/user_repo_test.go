@@ -81,6 +81,30 @@ func (ts *UserRepoTestSuite) TestInsert() {
 	})
 }
 
+func (ts *UserRepoTestSuite) TestGetOne() {
+	ts.T().Run("It should return user and error nil if record found", func(t *testing.T) {
+		user := model.User{
+			FullName:       "User1",
+			Email:          "email1@gmail.com",
+			HashedPassword: "hashedPassword1",
+			IsVerified:     false,
+		}
+
+		err := ts.repo.Insert(context.TODO(), user.FullName, user.Email, user.HashedPassword, user.IsVerified)
+		require.NoError(t, err)
+
+		result, err := ts.repo.GetOne(context.TODO(), user.Email, user.HashedPassword)
+		require.NoError(t, err)
+		require.Equal(t, user.Email, result.Email)
+		require.Equal(t, user.HashedPassword, result.HashedPassword)
+	})
+
+	ts.T().Run("It should return error if record not found", func(t *testing.T) {
+		_, err := ts.repo.GetOne(context.TODO(), "noemail@gmail.com", "nohashedpassword")
+		require.Error(t, err)
+	})
+}
+
 func TestSuite(t *testing.T) {
 	suite.Run(t, new(UserRepoTestSuite))
 }
