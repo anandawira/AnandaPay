@@ -24,8 +24,8 @@ func (m *userRepository) Insert(ctx context.Context, fullname, email, hashedPass
 	return nil
 }
 
-func (m *userRepository) GetOne(ctx context.Context, email string, hashedPassword string) (user model.User, err error) {
-	result := m.db.Where("email = ? AND hashed_password = ?", email, hashedPassword).First(&user)
+func (m *userRepository) GetByEmail(ctx context.Context, email string) (user model.User, err error) {
+	result := m.db.Where("email = ?", email).First(&user)
 	err = result.Error
 	return
 }

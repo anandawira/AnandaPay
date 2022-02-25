@@ -21,5 +21,5 @@ type UserUsecase interface {
 
 type UserRepository interface {
 	Insert(ctx context.Context, fullname, email, hashedPassword string, isVerified bool) error
-	GetOne(ctx context.Context, email, hashedPassword string) (user User, err error)
+	GetByEmail(ctx context.Context, email string) (user User, err error)
 }

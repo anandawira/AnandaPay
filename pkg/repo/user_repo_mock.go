@@ -16,7 +16,7 @@ func (m *MockUserRepo) Insert(ctx context.Context, fullname, email, hashedPasswo
 	return args.Error(0)
 }
 
-func (m *MockUserRepo) GetOne(ctx context.Context, email string, hashedPassword string) (user model.User, err error) {
-	args := m.Called(ctx, email, hashedPassword)
+func (m *MockUserRepo) GetByEmail(ctx context.Context, email string) (user model.User, err error) {
+	args := m.Called(ctx, email)
 	return args.Get(0).(model.User), args.Error(1)
 }
