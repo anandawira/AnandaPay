@@ -8,8 +8,8 @@ import (
 
 	"github.com/anandawira/anandapay/pkg/model"
 	"github.com/anandawira/anandapay/pkg/repo"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -43,7 +43,7 @@ func (ts *UserUsecaseTestSuite) TestRegister() {
 			"password",
 		)
 
-		ts.Assertions.NoError(err)
+		assert.NoError(t, err)
 		ts.mockRepo.AssertExpectations(t)
 	})
 
@@ -63,7 +63,7 @@ func (ts *UserUsecaseTestSuite) TestRegister() {
 			"duplicate@gmail.com",
 			"password2",
 		)
-		ts.Assertions.Error(err)
+		assert.Error(t, err)
 		ts.mockRepo.AssertExpectations(t)
 	})
 }
@@ -90,7 +90,7 @@ func (ts *UserUsecaseTestSuite) TestLogin() {
 		).Return(user, nil).Once()
 
 		_, err = ts.usecase.Login(context.TODO(), "email", plainPassword)
-		require.NoError(t, err)
+		assert.NoError(t, err)
 	})
 
 	ts.T().Run("It should return error if email not found", func(t *testing.T) {
@@ -101,7 +101,7 @@ func (ts *UserUsecaseTestSuite) TestLogin() {
 		).Return(model.User{}, nil).Once()
 
 		_, err := ts.usecase.Login(context.TODO(), "email", plainPassword)
-		require.Error(t, err)
+		assert.Error(t, err)
 	})
 
 	ts.T().Run("It should return error if email and password doesn't match", func(t *testing.T) {
@@ -124,7 +124,7 @@ func (ts *UserUsecaseTestSuite) TestLogin() {
 		).Return(user, nil).Once()
 
 		_, err = ts.usecase.Login(context.TODO(), "email", "anotherPassword")
-		require.Error(t, err)
+		assert.Error(t, err)
 	})
 }
 

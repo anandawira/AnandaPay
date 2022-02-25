@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/anandawira/anandapay/pkg/model"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 	"gorm.io/driver/mysql"
@@ -55,7 +56,7 @@ func (ts *UserRepoTestSuite) TestInsert() {
 		}
 
 		err := ts.repo.Insert(context.TODO(), user.FullName, user.Email, user.HashedPassword, user.IsVerified)
-		require.NoError(t, err)
+		assert.NoError(t, err)
 	})
 
 	ts.T().Run("It should not insert to the database if email already exist.", func(t *testing.T) {
@@ -77,7 +78,7 @@ func (ts *UserRepoTestSuite) TestInsert() {
 		require.NoError(t, err)
 
 		err = ts.repo.Insert(context.TODO(), user2.FullName, user2.Email, user2.HashedPassword, user2.IsVerified)
-		require.Error(t, err)
+		assert.Error(t, err)
 	})
 }
 
@@ -95,13 +96,13 @@ func (ts *UserRepoTestSuite) TestGetOne() {
 
 		result, err := ts.repo.GetByEmail(context.TODO(), user.Email)
 		require.NoError(t, err)
-		require.Equal(t, user.Email, result.Email)
-		require.Equal(t, user.HashedPassword, result.HashedPassword)
+		assert.Equal(t, user.Email, result.Email)
+		assert.Equal(t, user.HashedPassword, result.HashedPassword)
 	})
 
 	ts.T().Run("It should return error if record not found", func(t *testing.T) {
 		_, err := ts.repo.GetByEmail(context.TODO(), "noemail@gmail.com")
-		require.Error(t, err)
+		assert.Error(t, err)
 	})
 }
 
