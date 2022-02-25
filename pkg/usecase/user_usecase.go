@@ -34,3 +34,7 @@ func (m *userUsecase) Register(c context.Context, fullname, email, plainPassword
 
 	return nil
 }
+
+func (m *userUsecase) Login(ctx context.Context, email string, plainPassword string) (token string, err error) {
+	panic("not implemented") // TODO: Implement
+}
