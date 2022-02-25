@@ -13,19 +13,19 @@ import (
 
 type UserUsecaseTestSuite struct {
 	suite.Suite
-	repo    *repo.MockUserRepo
-	usecase model.UserUsecase
+	mockRepo *repo.MockUserRepo
+	usecase  model.UserUsecase
 }
 
 func (ts *UserUsecaseTestSuite) SetupSuite() {
-	ts.repo = new(repo.MockUserRepo)
-	ts.usecase = NewUserUsecase(ts.repo, 5)
+	ts.mockRepo = new(repo.MockUserRepo)
+	ts.usecase = NewUserUsecase(ts.mockRepo, 5)
 }
 
 func (ts *UserUsecaseTestSuite) TestRegister() {
 	ts.T().Run("It should return true if user added to the database successfully.", func(t *testing.T) {
 
-		ts.repo.On(
+		ts.mockRepo.On(
 			"Insert",
 			mock.Anything,
 			mock.AnythingOfType("string"),
@@ -42,12 +42,12 @@ func (ts *UserUsecaseTestSuite) TestRegister() {
 		)
 
 		ts.Assertions.NoError(err)
-		ts.repo.AssertExpectations(t)
+		ts.mockRepo.AssertExpectations(t)
 	})
 
 	ts.T().Run("It should return false if email already exist.", func(t *testing.T) {
 		const email string = "duplicate@gmail.com"
-		ts.repo.On(
+		ts.mockRepo.On(
 			"Insert",
 			mock.Anything,
 			mock.AnythingOfType("string"),
@@ -63,9 +63,9 @@ func (ts *UserUsecaseTestSuite) TestRegister() {
 			"password2",
 		)
 		ts.Assertions.NoError(err)
-		ts.repo.AssertExpectations(t)
+		ts.mockRepo.AssertExpectations(t)
 
-		ts.repo.On(
+		ts.mockRepo.On(
 			"Insert",
 			mock.Anything,
 			mock.AnythingOfType("string"),
@@ -81,7 +81,7 @@ func (ts *UserUsecaseTestSuite) TestRegister() {
 			"password2",
 		)
 		ts.Assertions.Error(err)
-		ts.repo.AssertExpectations(t)
+		ts.mockRepo.AssertExpectations(t)
 	})
 }
 
