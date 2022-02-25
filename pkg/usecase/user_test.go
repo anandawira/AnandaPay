@@ -6,27 +6,19 @@ import (
 	"testing"
 
 	"github.com/anandawira/anandapay/pkg/model"
+	"github.com/anandawira/anandapay/pkg/repo"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 )
 
-type MockUserRepo struct {
-	mock.Mock
-}
-
-func (m *MockUserRepo) Insert(ctx context.Context, fullname, email, hashedPassword string, isVerified bool) error {
-	args := m.Called(ctx, fullname, email, hashedPassword, isVerified)
-	return args.Error(0)
-}
-
 type UserUsecaseTestSuite struct {
 	suite.Suite
-	repo    *MockUserRepo
+	repo    *repo.MockUserRepo
 	usecase model.UserUsecase
 }
 
 func (ts *UserUsecaseTestSuite) SetupSuite() {
-	ts.repo = new(MockUserRepo)
+	ts.repo = new(repo.MockUserRepo)
 	ts.usecase = NewUserUsecase(ts.repo, 5)
 }
 
