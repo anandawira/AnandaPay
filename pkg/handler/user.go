@@ -7,18 +7,18 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type userHandler struct {
+type UserHandler struct {
 	userUsecase model.UserUsecase
 }
 
 func NewUserHandler(g *gin.Engine, usecase model.UserUsecase) {
-	handler := &userHandler{
+	handler := &UserHandler{
 		userUsecase: usecase,
 	}
 	g.POST("/users", handler.RegisterPost)
 }
 
-func (h *userHandler) RegisterPost(c *gin.Context) {
+func (h *UserHandler) RegisterPost(c *gin.Context) {
 	reqBody := RegisterRequest{}
 	err := c.ShouldBind(&reqBody)
 	if err != nil {
