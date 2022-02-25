@@ -47,6 +47,7 @@ func (ts *UserUsecaseTestSuite) TestRegister() {
 
 	ts.T().Run("It should return false if email already exist.", func(t *testing.T) {
 		const email string = "duplicate@gmail.com"
+
 		ts.mockRepo.On(
 			"Insert",
 			mock.Anything,
