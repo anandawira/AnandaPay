@@ -27,5 +27,5 @@ func (m *userRepository) Insert(ctx context.Context, fullname, email, hashedPass
 func (m *userRepository) GetByEmail(ctx context.Context, email string) (user model.User, err error) {
 	result := m.db.Where("email = ?", email).First(&user)
 	err = result.Error
-	return
+	return user, err
 }
