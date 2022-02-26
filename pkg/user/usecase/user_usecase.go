@@ -2,7 +2,6 @@ package usecase
 
 import (
 	"context"
-	"errors"
 	"log"
 	"strconv"
 	"time"
@@ -32,7 +31,7 @@ func (m *userUsecase) Register(c context.Context, fullname, email, plainPassword
 
 	err = m.userRepo.Insert(ctx, fullname, email, string(hashedPassword), false)
 	if err != nil {
-		return errors.New("Email already in use.")
+		return domain.ErrEmailUsed
 	}
 
 	return nil
@@ -41,12 +40,12 @@ func (m *userUsecase) Register(c context.Context, fullname, email, plainPassword
 func (m *userUsecase) Login(ctx context.Context, email string, plainPassword string) (token string, err error) {
 	user, err := m.userRepo.GetByEmail(ctx, email)
 	if err != nil {
-		return "", errors.New("Incorrect email or password.")
+		return "", domain.ErrWrongEmailPass
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(user.HashedPassword), []byte(plainPassword))
 	if err != nil {
-		return "", errors.New("Incorrect email or password.")
+		return "", domain.ErrInternalServerError
 	}
 
 	// Hardcode, later change to env

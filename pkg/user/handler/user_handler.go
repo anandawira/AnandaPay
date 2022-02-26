@@ -24,7 +24,7 @@ func (h *UserHandler) RegisterPost(c *gin.Context) {
 	err := c.ShouldBind(&reqBody)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"message": "Parameter validation failed.",
+			"message": domain.ErrParameterValidation.Error(),
 		})
 		return
 	}
@@ -47,7 +47,7 @@ func (h *UserHandler) LoginPost(c *gin.Context) {
 	err := c.ShouldBind(&reqBody)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"message": "Parameter validation failed.",
+			"message": domain.ErrParameterValidation.Error(),
 		})
 		return
 	}

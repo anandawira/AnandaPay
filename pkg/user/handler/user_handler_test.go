@@ -2,13 +2,13 @@ package handler
 
 import (
 	"encoding/json"
-	"errors"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
 	"strings"
 	"testing"
 
+	"github.com/anandawira/anandapay/domain"
 	"github.com/anandawira/anandapay/pkg/user/usecase"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
@@ -88,7 +88,7 @@ func (ts *UserHandlerTestSuite) TestRegister() {
 
 		ts.handler.RegisterPost(c)
 
-		assertResponse(t, http.StatusBadRequest, "Parameter validation failed.", rec)
+		assertResponse(t, http.StatusBadRequest, domain.ErrParameterValidation.Error(), rec)
 	})
 
 	ts.T().Run("It should return with StatusBadRequest on duplicate email", func(t *testing.T) {
@@ -98,13 +98,13 @@ func (ts *UserHandlerTestSuite) TestRegister() {
 			mock.AnythingOfType("string"),
 			mock.AnythingOfType("string"),
 			mock.AnythingOfType("string"),
-		).Return(errors.New("Email already in use.")).Once()
+		).Return(domain.ErrEmailUsed).Once()
 
 		c, rec := createPostContext(bodySample)
 
 		ts.handler.RegisterPost(c)
 
-		assertResponse(t, http.StatusBadRequest, "Email already in use.", rec)
+		assertResponse(t, http.StatusBadRequest, domain.ErrEmailUsed.Error(), rec)
 	})
 }
 
@@ -117,15 +117,11 @@ func (ts *UserHandlerTestSuite) TestLogin() {
 			mock.AnythingOfType("string"),
 		).Return("token", nil).Once()
 
-		form := url.Values{}
-		form.Set("email", "test@gmail.com")
-		form.Set("password", "testpassword")
-
-		req := httptest.NewRequest("POST", "/users", strings.NewReader(form.Encode()))
-		req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
-		rec := httptest.NewRecorder()
-		c, _ := gin.CreateTestContext(rec)
-		c.Request = req
+		body := map[string]string{
+			"email":    "test@gmail.com",
+			"password": "testpassword",
+		}
+		c, rec := createPostContext(body)
 
 		ts.handler.LoginPost(c)
 		assert.Equal(t, http.StatusOK, rec.Code)

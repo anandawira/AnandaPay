@@ -10,6 +10,7 @@ import (
 	"github.com/anandawira/anandapay/pkg/user/repo"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -70,11 +71,9 @@ func (ts *UserUsecaseTestSuite) TestRegister() {
 
 func (ts *UserUsecaseTestSuite) TestLogin() {
 	const plainPassword string = "plainPassword"
-	ts.T().Run("It should return token if email and password math", func(t *testing.T) {
+	ts.T().Run("It should return token if email and password match", func(t *testing.T) {
 		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(plainPassword), 0)
-		if err != nil {
-			log.Fatal("Password hashing error", err.Error())
-		}
+		require.NoError(t, err)
 
 		user := domain.User{
 			FullName:       "user name 1",
