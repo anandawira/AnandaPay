@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"encoding/json"
 	"errors"
 	"net/http"
 	"net/http/httptest"
@@ -107,14 +108,28 @@ func (ts *UserHandlerTestSuite) TestRegister() {
 	})
 }
 
+func (ts *UserHandlerTestSuite) TestLogin() {
+	ts.T().Run("It should return with status OK", func(t *testing.T) {
+		ts.mockUsecase.On(
+			"Login",
+			mock.Anything,
+			mock.AnythingOfType("string"),
+			mock.AnythingOfType("string"),
+		).Return("token", nil).Once()
+
+		form := url.Values{}
+		form.Set("email", "test@gmail.com")
+		form.Set("password", "testpassword")
+
 		req := httptest.NewRequest("POST", "/users", strings.NewReader(form.Encode()))
 		req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 		rec := httptest.NewRecorder()
 		c, _ := gin.CreateTestContext(rec)
 		c.Request = req
 
-		ts.handler.RegisterPost(c)
-		assert.Equal(t, http.StatusBadRequest, rec.Result().StatusCode)
+		ts.handler.LoginPost(c)
+		assert.Equal(t, http.StatusOK, rec.Code)
+		assertResponse(t, http.StatusOK, "User logged in successfully.", rec)
 	})
 }
 
