@@ -45,7 +45,7 @@ func (m *userUsecase) Login(ctx context.Context, email string, plainPassword str
 
 	err = bcrypt.CompareHashAndPassword([]byte(user.HashedPassword), []byte(plainPassword))
 	if err != nil {
-		return "", domain.ErrInternalServerError
+		return "", domain.ErrWrongEmailPass
 	}
 
 	// Hardcode, later change to env
