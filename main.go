@@ -4,9 +4,9 @@ import (
 	"time"
 
 	"github.com/anandawira/anandapay/config"
-	"github.com/anandawira/anandapay/pkg/handler"
-	"github.com/anandawira/anandapay/pkg/repo"
-	"github.com/anandawira/anandapay/pkg/usecase"
+	"github.com/anandawira/anandapay/pkg/user/handler"
+	"github.com/anandawira/anandapay/pkg/user/repo"
+	"github.com/anandawira/anandapay/pkg/user/usecase"
 	"github.com/gin-gonic/gin"
 )
 

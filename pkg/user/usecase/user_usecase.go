@@ -7,17 +7,17 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/anandawira/anandapay/pkg/model"
+	"github.com/anandawira/anandapay/domain"
 	"github.com/golang-jwt/jwt"
 	"golang.org/x/crypto/bcrypt"
 )
 
 type userUsecase struct {
-	userRepo       model.UserRepository
+	userRepo       domain.UserRepository
 	contextTimeout time.Duration
 }
 
-func NewUserUsecase(repo model.UserRepository, timeout time.Duration) model.UserUsecase {
+func NewUserUsecase(repo domain.UserRepository, timeout time.Duration) domain.UserUsecase {
 	return &userUsecase{userRepo: repo, contextTimeout: timeout}
 }
 

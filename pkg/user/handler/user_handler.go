@@ -3,15 +3,15 @@ package handler
 import (
 	"net/http"
 
-	"github.com/anandawira/anandapay/pkg/model"
+	"github.com/anandawira/anandapay/domain"
 	"github.com/gin-gonic/gin"
 )
 
 type UserHandler struct {
-	userUsecase model.UserUsecase
+	userUsecase domain.UserUsecase
 }
 
-func AttachHandler(g *gin.Engine, usecase model.UserUsecase) {
+func AttachHandler(g *gin.Engine, usecase domain.UserUsecase) {
 	handler := &UserHandler{
 		userUsecase: usecase,
 	}

@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/anandawira/anandapay/pkg/usecase"
+	"github.com/anandawira/anandapay/pkg/user/usecase"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
