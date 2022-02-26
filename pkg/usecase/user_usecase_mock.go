@@ -16,5 +16,6 @@ func (m *MockUserUsecase) Register(ctx context.Context, fullname, email, plainPa
 }
 
 func (m *MockUserUsecase) Login(ctx context.Context, email string, plainPassword string) (token string, err error) {
-	panic("not implemented") // TODO: Implement
+	args := m.Called(ctx, email, plainPassword)
+	return args.String(0), args.Error(1)
 }
