@@ -113,7 +113,7 @@ func (ts *UserHandlerTestSuite) TestLogin() {
 		"email":    "test@gmail.com",
 		"password": "testpassword",
 	}
-	ts.T().Run("It should return with StatusOK", func(t *testing.T) {
+	ts.T().Run("It should return with StatusOK and set cookie on login success", func(t *testing.T) {
 		ts.mockUsecase.On(
 			"Login",
 			mock.Anything,
@@ -125,18 +125,20 @@ func (ts *UserHandlerTestSuite) TestLogin() {
 
 		ts.handler.LoginPost(c)
 
+		assert.NotEqual(t, "", rec.Header().Get("Set-Cookie"))
 		assertResponse(t, http.StatusOK, "User logged in successfully.", rec)
 	})
 
-	ts.T().Run("It should return with StatusBadRequest on invalid input", func(t *testing.T) {
+	ts.T().Run("It should return with StatusBadRequest and not set cookie on invalid input", func(t *testing.T) {
 		c, rec := createPostContext(map[string]string{})
 
 		ts.handler.LoginPost(c)
 
+		assert.Equal(t, "", rec.Header().Get("Set-Cookie"))
 		assertResponse(t, http.StatusBadRequest, domain.ErrParameterValidation.Error(), rec)
 	})
 
-	ts.T().Run("It should return with StatusBadRequest on wrong email or password", func(t *testing.T) {
+	ts.T().Run("It should return with StatusBadRequest and not set cookie on wrong email or password", func(t *testing.T) {
 		ts.mockUsecase.On(
 			"Login",
 			mock.Anything,
@@ -148,6 +150,7 @@ func (ts *UserHandlerTestSuite) TestLogin() {
 
 		ts.handler.LoginPost(c)
 
+		assert.Equal(t, "", rec.Header().Get("Set-Cookie"))
 		assertResponse(t, http.StatusBadRequest, domain.ErrWrongEmailPass.Error(), rec)
 	})
 }
