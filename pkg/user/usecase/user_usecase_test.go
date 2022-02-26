@@ -6,8 +6,8 @@ import (
 	"log"
 	"testing"
 
-	"github.com/anandawira/anandapay/pkg/model"
-	"github.com/anandawira/anandapay/pkg/repo"
+	"github.com/anandawira/anandapay/domain"
+	"github.com/anandawira/anandapay/pkg/user/repo"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
@@ -17,7 +17,7 @@ import (
 type UserUsecaseTestSuite struct {
 	suite.Suite
 	mockRepo *repo.MockUserRepo
-	usecase  model.UserUsecase
+	usecase  domain.UserUsecase
 }
 
 func (ts *UserUsecaseTestSuite) SetupSuite() {
@@ -76,7 +76,7 @@ func (ts *UserUsecaseTestSuite) TestLogin() {
 			log.Fatal("Password hashing error", err.Error())
 		}
 
-		user := model.User{
+		user := domain.User{
 			FullName:       "user name 1",
 			Email:          "email@gmail.com",
 			HashedPassword: string(hashedPassword),
@@ -98,7 +98,7 @@ func (ts *UserUsecaseTestSuite) TestLogin() {
 			"GetByEmail",
 			mock.Anything,
 			mock.AnythingOfType("string"),
-		).Return(model.User{}, nil).Once()
+		).Return(domain.User{}, nil).Once()
 
 		_, err := ts.usecase.Login(context.TODO(), "email", plainPassword)
 		assert.Error(t, err)
@@ -110,7 +110,7 @@ func (ts *UserUsecaseTestSuite) TestLogin() {
 			log.Fatal("Password hashing error", err.Error())
 		}
 
-		user := model.User{
+		user := domain.User{
 			FullName:       "user name 1",
 			Email:          "email@gmail.com",
 			HashedPassword: string(hashedPassword),

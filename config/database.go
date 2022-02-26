@@ -3,7 +3,7 @@ package config
 import (
 	"log"
 
-	"github.com/anandawira/anandapay/pkg/model"
+	"github.com/anandawira/anandapay/domain"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
@@ -19,7 +19,7 @@ func Connect() *gorm.DB {
 		log.Fatal(err.Error())
 	}
 
-	db.AutoMigrate(&model.User{})
+	db.AutoMigrate(&domain.User{})
 
 	DB = db
 	return DB

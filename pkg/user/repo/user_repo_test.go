@@ -5,7 +5,7 @@ import (
 	"log"
 	"testing"
 
-	"github.com/anandawira/anandapay/pkg/model"
+	"github.com/anandawira/anandapay/domain"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
@@ -17,7 +17,7 @@ type UserRepoTestSuite struct {
 	suite.Suite
 
 	DB   *gorm.DB
-	repo model.UserRepository
+	repo domain.UserRepository
 }
 
 func (ts *UserRepoTestSuite) SetupSuite() {
@@ -34,8 +34,8 @@ func (ts *UserRepoTestSuite) SetupSuite() {
 }
 
 func (ts *UserRepoTestSuite) SetupTest() {
-	ts.DB.Migrator().DropTable(&model.User{})
-	ts.DB.AutoMigrate(&model.User{})
+	ts.DB.Migrator().DropTable(&domain.User{})
+	ts.DB.AutoMigrate(&domain.User{})
 }
 
 func (ts *UserRepoTestSuite) TearDownSuite() {
@@ -48,7 +48,7 @@ func (ts *UserRepoTestSuite) TearDownSuite() {
 
 func (ts *UserRepoTestSuite) TestInsert() {
 	ts.T().Run("It should insert to the database.", func(t *testing.T) {
-		user := model.User{
+		user := domain.User{
 			FullName:       "User1",
 			Email:          "email1@gmail.com",
 			HashedPassword: "hashedPassword1",
@@ -61,13 +61,13 @@ func (ts *UserRepoTestSuite) TestInsert() {
 
 	ts.T().Run("It should not insert to the database if email already exist.", func(t *testing.T) {
 		const email string = "duplicate@gmail.com"
-		user1 := model.User{
+		user1 := domain.User{
 			FullName:       "User1",
 			Email:          email,
 			HashedPassword: "hashedPassword1",
 			IsVerified:     false,
 		}
-		user2 := model.User{
+		user2 := domain.User{
 			FullName:       "User2",
 			Email:          email,
 			HashedPassword: "hashedPassword2",
@@ -84,7 +84,7 @@ func (ts *UserRepoTestSuite) TestInsert() {
 
 func (ts *UserRepoTestSuite) TestGetOne() {
 	ts.T().Run("It should return user and error nil if record found", func(t *testing.T) {
-		user := model.User{
+		user := domain.User{
 			FullName:       "User1",
 			Email:          "email1@gmail.com",
 			HashedPassword: "hashedPassword1",
