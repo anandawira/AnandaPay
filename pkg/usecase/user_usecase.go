@@ -2,10 +2,13 @@ package usecase
 
 import (
 	"context"
+	"errors"
 	"log"
+	"strconv"
 	"time"
 
 	"github.com/anandawira/anandapay/pkg/model"
+	"github.com/golang-jwt/jwt"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -29,8 +32,35 @@ func (m *userUsecase) Register(c context.Context, fullname, email, plainPassword
 
 	err = m.userRepo.Insert(ctx, fullname, email, string(hashedPassword), false)
 	if err != nil {
-		return err
+		return errors.New("Email already in use.")
 	}
 
 	return nil
+}
+
+func (m *userUsecase) Login(ctx context.Context, email string, plainPassword string) (token string, err error) {
+	user, err := m.userRepo.GetByEmail(ctx, email)
+	if err != nil {
+		return "", errors.New("Incorrect email or password.")
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(user.HashedPassword), []byte(plainPassword))
+	if err != nil {
+		return "", errors.New("Incorrect email or password.")
+	}
+
+	// Hardcode, later change to env
+	var secretKey string = "secret"
+
+	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
+		Issuer:    strconv.Itoa(int(user.ID)),
+		ExpiresAt: time.Now().Add(time.Hour).Unix(),
+	})
+
+	token, err = claims.SignedString([]byte(secretKey))
+	if err != nil {
+		log.Fatal("JWT token generation failed.", err.Error())
+	}
+
+	return token, nil
 }

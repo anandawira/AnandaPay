@@ -15,7 +15,8 @@ func AttachHandler(g *gin.Engine, usecase model.UserUsecase) {
 	handler := &UserHandler{
 		userUsecase: usecase,
 	}
-	g.POST("/users", handler.RegisterPost)
+	g.POST("/register", handler.RegisterPost)
+	g.POST("/login", handler.LoginPost)
 }
 
 func (h *UserHandler) RegisterPost(c *gin.Context) {
@@ -23,7 +24,7 @@ func (h *UserHandler) RegisterPost(c *gin.Context) {
 	err := c.ShouldBind(&reqBody)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"message": err.Error(),
+			"message": "Parameter validation failed.",
 		})
 		return
 	}
@@ -37,6 +38,30 @@ func (h *UserHandler) RegisterPost(c *gin.Context) {
 	} else {
 		c.JSON(http.StatusOK, gin.H{
 			"message": "User registered to the database successfully.",
+		})
+	}
+}
+
+func (h *UserHandler) LoginPost(c *gin.Context) {
+	reqBody := LoginRequest{}
+	err := c.ShouldBind(&reqBody)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "Parameter validation failed.",
+		})
+		return
+	}
+
+	ctx := c.Request.Context()
+	token, err := h.userUsecase.Login(ctx, reqBody.Email, reqBody.Password)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+	} else {
+		c.SetCookie("access_token", token, 3600*12, "/", "", false, true)
+		c.JSON(http.StatusOK, gin.H{
+			"message": "User logged in successfully.",
 		})
 	}
 }
