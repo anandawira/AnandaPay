@@ -3,6 +3,7 @@ package usecase
 import (
 	"context"
 
+	"github.com/anandawira/anandapay/domain"
 	"github.com/stretchr/testify/mock"
 )
 
@@ -15,7 +16,7 @@ func (m *MockUserUsecase) Register(ctx context.Context, fullname, email, plainPa
 	return args.Error(0)
 }
 
-func (m *MockUserUsecase) Login(ctx context.Context, email string, plainPassword string) (token string, err error) {
+func (m *MockUserUsecase) Login(ctx context.Context, email string, plainPassword string) (domain.User, string, error) {
 	args := m.Called(ctx, email, plainPassword)
-	return args.String(0), args.Error(1)
+	return args.Get(0).(domain.User), args.String(1), args.Error(2)
 }

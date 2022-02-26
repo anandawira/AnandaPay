@@ -16,10 +16,10 @@ type User struct {
 
 type UserUsecase interface {
 	Register(ctx context.Context, fullname, email, plainPassword string) error
-	Login(ctx context.Context, email, plainPassword string) (token string, err error)
+	Login(ctx context.Context, email, plainPassword string) (User, string, error)
 }
 
 type UserRepository interface {
 	Insert(ctx context.Context, fullname, email, hashedPassword string, isVerified bool) error
-	GetByEmail(ctx context.Context, email string) (user User, err error)
+	GetByEmail(ctx context.Context, email string) (User, error)
 }

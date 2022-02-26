@@ -53,15 +53,20 @@ func (h *UserHandler) LoginPost(c *gin.Context) {
 	}
 
 	ctx := c.Request.Context()
-	token, err := h.userUsecase.Login(ctx, reqBody.Email, reqBody.Password)
+	user, token, err := h.userUsecase.Login(ctx, reqBody.Email, reqBody.Password)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
 		})
 	} else {
-		c.SetCookie("access_token", token, 3600*12, "/", "", false, true)
 		c.JSON(http.StatusOK, gin.H{
 			"message": "User logged in successfully.",
+			"data": LoginResponseData{
+				Id:          user.ID,
+				Fullname:    user.FullName,
+				Email:       user.Email,
+				AccessToken: token,
+			},
 		})
 	}
 }

@@ -37,15 +37,15 @@ func (m *userUsecase) Register(c context.Context, fullname, email, plainPassword
 	return nil
 }
 
-func (m *userUsecase) Login(ctx context.Context, email string, plainPassword string) (token string, err error) {
+func (m *userUsecase) Login(ctx context.Context, email string, plainPassword string) (domain.User, string, error) {
 	user, err := m.userRepo.GetByEmail(ctx, email)
 	if err != nil {
-		return "", domain.ErrWrongEmailPass
+		return user, "", domain.ErrWrongEmailPass
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(user.HashedPassword), []byte(plainPassword))
 	if err != nil {
-		return "", domain.ErrWrongEmailPass
+		return user, "", domain.ErrWrongEmailPass
 	}
 
 	// Hardcode, later change to env
@@ -53,13 +53,13 @@ func (m *userUsecase) Login(ctx context.Context, email string, plainPassword str
 
 	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
 		Issuer:    strconv.Itoa(int(user.ID)),
-		ExpiresAt: time.Now().Add(time.Hour).Unix(),
+		ExpiresAt: time.Now().Add(12 * time.Hour).Unix(),
 	})
 
-	token, err = claims.SignedString([]byte(secretKey))
+	token, err := claims.SignedString([]byte(secretKey))
 	if err != nil {
 		log.Fatal("JWT token generation failed.", err.Error())
 	}
 
-	return token, nil
+	return user, token, nil
 }

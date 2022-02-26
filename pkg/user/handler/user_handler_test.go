@@ -44,21 +44,44 @@ func createPostContext(body map[string]string) (*gin.Context, *httptest.Response
 	return c, rec
 }
 
-func assertResponse(t testing.TB, code int, message string, recorder *httptest.ResponseRecorder) {
+func assertResponseStatusAndMessage(t testing.TB, code int, message string, recorder *httptest.ResponseRecorder) {
 	t.Helper()
 
-	want := gin.H{
-		"message": message,
-	}
-
-	var got gin.H
-	err := json.Unmarshal(recorder.Body.Bytes(), &got)
+	var resBody gin.H
+	err := json.Unmarshal(recorder.Body.Bytes(), &resBody)
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
 
 	assert.Equal(t, code, recorder.Code)
+	assert.Equal(t, message, resBody["message"])
+}
+
+func assertResponseBody(t testing.TB, body gin.H, recorder *httptest.ResponseRecorder) {
+	t.Helper()
+
+	want, err := json.Marshal(body)
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+
+	got := recorder.Body.Bytes()
+
 	assert.Equal(t, want, got)
+}
+
+func assertResponse(t testing.TB, code int, body gin.H, recorder *httptest.ResponseRecorder) {
+	t.Helper()
+
+	want, err := json.Marshal(body)
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+
+	got := recorder.Body.Bytes()
+
+	assert.Equal(t, code, recorder.Code, "http status code not equal")
+	assert.Equal(t, want, got, "response body not equal")
 }
 
 func (ts *UserHandlerTestSuite) TestRegister() {
@@ -80,7 +103,7 @@ func (ts *UserHandlerTestSuite) TestRegister() {
 
 		ts.handler.RegisterPost(c)
 
-		assertResponse(t, http.StatusOK, "User registered to the database successfully.", rec)
+		assertResponse(t, http.StatusOK, gin.H{"message": "User registered to the database successfully."}, rec)
 	})
 
 	ts.T().Run("It should return with StatusBadRequest on invalid input", func(t *testing.T) {
@@ -88,7 +111,7 @@ func (ts *UserHandlerTestSuite) TestRegister() {
 
 		ts.handler.RegisterPost(c)
 
-		assertResponse(t, http.StatusBadRequest, domain.ErrParameterValidation.Error(), rec)
+		assertResponse(t, http.StatusBadRequest, gin.H{"message": domain.ErrParameterValidation.Error()}, rec)
 	})
 
 	ts.T().Run("It should return with StatusBadRequest on duplicate email", func(t *testing.T) {
@@ -104,54 +127,66 @@ func (ts *UserHandlerTestSuite) TestRegister() {
 
 		ts.handler.RegisterPost(c)
 
-		assertResponse(t, http.StatusBadRequest, domain.ErrEmailUsed.Error(), rec)
+		assertResponse(t, http.StatusBadRequest, gin.H{"message": domain.ErrEmailUsed.Error()}, rec)
 	})
 }
 
 func (ts *UserHandlerTestSuite) TestLogin() {
+	user := domain.User{
+		FullName: "Full Name",
+		Email:    "test@gmail.com",
+	}
+
 	body := map[string]string{
-		"email":    "test@gmail.com",
+		"email":    user.Email,
 		"password": "testpassword",
 	}
-	ts.T().Run("It should return with StatusOK and set cookie on login success", func(t *testing.T) {
+
+	ts.T().Run("It should return with StatusOK and data on login success", func(t *testing.T) {
 		ts.mockUsecase.On(
 			"Login",
 			mock.Anything,
 			mock.AnythingOfType("string"),
 			mock.AnythingOfType("string"),
-		).Return("token", nil).Once()
+		).Return(user, "token", nil).Once()
 
 		c, rec := createPostContext(body)
 
 		ts.handler.LoginPost(c)
 
-		assert.NotEqual(t, "", rec.Header().Get("Set-Cookie"))
-		assertResponse(t, http.StatusOK, "User logged in successfully.", rec)
+		body := gin.H{
+			"message": "User logged in successfully.",
+			"data": LoginResponseData{
+				Id:          0,
+				Fullname:    user.FullName,
+				Email:       user.Email,
+				AccessToken: "token",
+			},
+		}
+		assertResponse(t, http.StatusOK, body, rec)
 	})
 
-	ts.T().Run("It should return with StatusBadRequest and not set cookie on invalid input", func(t *testing.T) {
+	ts.T().Run("It should return with StatusBadRequest on invalid input", func(t *testing.T) {
 		c, rec := createPostContext(map[string]string{})
 
 		ts.handler.LoginPost(c)
 
-		assert.Equal(t, "", rec.Header().Get("Set-Cookie"))
-		assertResponse(t, http.StatusBadRequest, domain.ErrParameterValidation.Error(), rec)
+		assertResponse(t, http.StatusBadRequest, gin.H{"message": domain.ErrParameterValidation.Error()}, rec)
 	})
 
-	ts.T().Run("It should return with StatusBadRequest and not set cookie on wrong email or password", func(t *testing.T) {
+	ts.T().Run("It should return with StatusBadRequest on wrong email or password", func(t *testing.T) {
 		ts.mockUsecase.On(
 			"Login",
 			mock.Anything,
 			mock.AnythingOfType("string"),
 			mock.AnythingOfType("string"),
-		).Return("", domain.ErrWrongEmailPass).Once()
+		).Return(user, "", domain.ErrWrongEmailPass).Once()
 
 		c, rec := createPostContext(body)
 
 		ts.handler.LoginPost(c)
 
-		assert.Equal(t, "", rec.Header().Get("Set-Cookie"))
-		assertResponse(t, http.StatusBadRequest, domain.ErrWrongEmailPass.Error(), rec)
+		assertResponse(t, http.StatusBadRequest, gin.H{"message": domain.ErrWrongEmailPass.Error()}, rec)
 	})
 }
 

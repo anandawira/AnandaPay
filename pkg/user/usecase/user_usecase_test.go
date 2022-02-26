@@ -3,7 +3,6 @@ package usecase
 import (
 	"context"
 	"errors"
-	"log"
 	"testing"
 
 	"github.com/anandawira/anandapay/domain"
@@ -71,7 +70,7 @@ func (ts *UserUsecaseTestSuite) TestRegister() {
 
 func (ts *UserUsecaseTestSuite) TestLogin() {
 	const plainPassword string = "plainPassword"
-	ts.T().Run("It should return token if email and password match", func(t *testing.T) {
+	ts.T().Run("It should return user and token if email and password match", func(t *testing.T) {
 		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(plainPassword), 0)
 		require.NoError(t, err)
 
@@ -88,8 +87,10 @@ func (ts *UserUsecaseTestSuite) TestLogin() {
 			mock.AnythingOfType("string"),
 		).Return(user, nil).Once()
 
-		_, err = ts.usecase.Login(context.TODO(), "email", plainPassword)
-		assert.NoError(t, err)
+		userLogin, token, err := ts.usecase.Login(context.TODO(), "email", plainPassword)
+		require.NoError(t, err)
+		assert.Equal(t, user, userLogin)
+		assert.NotEqual(t, "", token)
 	})
 
 	ts.T().Run("It should return error if email not found", func(t *testing.T) {
@@ -99,20 +100,16 @@ func (ts *UserUsecaseTestSuite) TestLogin() {
 			mock.AnythingOfType("string"),
 		).Return(domain.User{}, nil).Once()
 
-		_, err := ts.usecase.Login(context.TODO(), "email", plainPassword)
+		_, _, err := ts.usecase.Login(context.TODO(), "email", plainPassword)
 		assert.Error(t, err)
 	})
 
 	ts.T().Run("It should return error if email and password doesn't match", func(t *testing.T) {
-		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(plainPassword), 0)
-		if err != nil {
-			log.Fatal("Password hashing error", err.Error())
-		}
 
 		user := domain.User{
 			FullName:       "user name 1",
 			Email:          "email@gmail.com",
-			HashedPassword: string(hashedPassword),
+			HashedPassword: "randomHashedPassword",
 			IsVerified:     false,
 		}
 
@@ -122,7 +119,7 @@ func (ts *UserUsecaseTestSuite) TestLogin() {
 			mock.AnythingOfType("string"),
 		).Return(user, nil).Once()
 
-		_, err = ts.usecase.Login(context.TODO(), "email", "anotherPassword")
+		_, _, err := ts.usecase.Login(context.TODO(), "email", "anotherPassword")
 		assert.Error(t, err)
 	})
 }
