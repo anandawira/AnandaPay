@@ -7,7 +7,7 @@ import (
 type User struct {
 	gorm.Model
 	FullName       string `gorm:"not null"`
-	Email          string `gorm:"unique;not null"`
+	Email          string `gorm:"uniqueIndex;not null"`
 	HashedPassword string `gorm:"not null"`
 	IsVerified     bool   `gorm:"not null"`
 }
