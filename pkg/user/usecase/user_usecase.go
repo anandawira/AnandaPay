@@ -1,7 +1,6 @@
 package usecase
 
 import (
-	"context"
 	"log"
 	"strconv"
 	"time"
@@ -20,16 +19,13 @@ func NewUserUsecase(repo domain.UserRepository, timeout time.Duration) domain.Us
 	return &userUsecase{userRepo: repo, contextTimeout: timeout}
 }
 
-func (m *userUsecase) Register(c context.Context, fullname, email, plainPassword string) error {
-	ctx, cancel := context.WithTimeout(c, m.contextTimeout)
-	defer cancel()
-
+func (m *userUsecase) Register(fullname, email, plainPassword string) error {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(plainPassword), 14)
 	if err != nil {
 		log.Fatal("Password hashing error", err.Error())
 	}
 
-	err = m.userRepo.Insert(ctx, fullname, email, string(hashedPassword), false)
+	err = m.userRepo.Insert(fullname, email, string(hashedPassword), false)
 	if err != nil {
 		return domain.ErrEmailUsed
 	}
@@ -37,8 +33,8 @@ func (m *userUsecase) Register(c context.Context, fullname, email, plainPassword
 	return nil
 }
 
-func (m *userUsecase) Login(ctx context.Context, email string, plainPassword string) (domain.User, string, error) {
-	user, err := m.userRepo.GetByEmail(ctx, email)
+func (m *userUsecase) Login(email string, plainPassword string) (domain.User, string, error) {
+	user, err := m.userRepo.GetByEmail(email)
 	if err != nil {
 		return user, "", domain.ErrWrongEmailPass
 	}

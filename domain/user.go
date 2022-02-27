@@ -1,8 +1,6 @@
 package domain
 
 import (
-	"context"
-
 	"gorm.io/gorm"
 )
 
@@ -15,11 +13,11 @@ type User struct {
 }
 
 type UserUsecase interface {
-	Register(ctx context.Context, fullname, email, plainPassword string) error
-	Login(ctx context.Context, email, plainPassword string) (User, string, error)
+	Register(fullname, email, plainPassword string) error
+	Login(email, plainPassword string) (User, string, error)
 }
 
 type UserRepository interface {
-	Insert(ctx context.Context, fullname, email, hashedPassword string, isVerified bool) error
-	GetByEmail(ctx context.Context, email string) (User, error)
+	Insert(fullname, email, hashedPassword string, isVerified bool) error
+	GetByEmail(email string) (User, error)
 }

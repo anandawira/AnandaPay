@@ -29,8 +29,7 @@ func (h *UserHandler) RegisterPost(c *gin.Context) {
 		return
 	}
 
-	ctx := c.Request.Context()
-	err = h.userUsecase.Register(ctx, reqBody.Fullname, reqBody.Email, reqBody.Password)
+	err = h.userUsecase.Register(reqBody.Fullname, reqBody.Email, reqBody.Password)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
@@ -52,8 +51,7 @@ func (h *UserHandler) LoginPost(c *gin.Context) {
 		return
 	}
 
-	ctx := c.Request.Context()
-	user, token, err := h.userUsecase.Login(ctx, reqBody.Email, reqBody.Password)
+	user, token, err := h.userUsecase.Login(reqBody.Email, reqBody.Password)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),

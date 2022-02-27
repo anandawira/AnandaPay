@@ -44,32 +44,6 @@ func createPostContext(body map[string]string) (*gin.Context, *httptest.Response
 	return c, rec
 }
 
-func assertResponseStatusAndMessage(t testing.TB, code int, message string, recorder *httptest.ResponseRecorder) {
-	t.Helper()
-
-	var resBody gin.H
-	err := json.Unmarshal(recorder.Body.Bytes(), &resBody)
-	if err != nil {
-		t.Fatalf(err.Error())
-	}
-
-	assert.Equal(t, code, recorder.Code)
-	assert.Equal(t, message, resBody["message"])
-}
-
-func assertResponseBody(t testing.TB, body gin.H, recorder *httptest.ResponseRecorder) {
-	t.Helper()
-
-	want, err := json.Marshal(body)
-	if err != nil {
-		t.Fatalf(err.Error())
-	}
-
-	got := recorder.Body.Bytes()
-
-	assert.Equal(t, want, got)
-}
-
 func assertResponse(t testing.TB, code int, body gin.H, recorder *httptest.ResponseRecorder) {
 	t.Helper()
 
@@ -93,7 +67,6 @@ func (ts *UserHandlerTestSuite) TestRegister() {
 	ts.T().Run("It should return with StatusOK", func(t *testing.T) {
 		ts.mockUsecase.On(
 			"Register",
-			mock.Anything,
 			mock.AnythingOfType("string"),
 			mock.AnythingOfType("string"),
 			mock.AnythingOfType("string"),
@@ -117,7 +90,6 @@ func (ts *UserHandlerTestSuite) TestRegister() {
 	ts.T().Run("It should return with StatusBadRequest on duplicate email", func(t *testing.T) {
 		ts.mockUsecase.On(
 			"Register",
-			mock.Anything,
 			mock.AnythingOfType("string"),
 			mock.AnythingOfType("string"),
 			mock.AnythingOfType("string"),
@@ -145,7 +117,6 @@ func (ts *UserHandlerTestSuite) TestLogin() {
 	ts.T().Run("It should return with StatusOK and data on login success", func(t *testing.T) {
 		ts.mockUsecase.On(
 			"Login",
-			mock.Anything,
 			mock.AnythingOfType("string"),
 			mock.AnythingOfType("string"),
 		).Return(user, "token", nil).Once()
@@ -177,7 +148,6 @@ func (ts *UserHandlerTestSuite) TestLogin() {
 	ts.T().Run("It should return with StatusBadRequest on wrong email or password", func(t *testing.T) {
 		ts.mockUsecase.On(
 			"Login",
-			mock.Anything,
 			mock.AnythingOfType("string"),
 			mock.AnythingOfType("string"),
 		).Return(user, "", domain.ErrWrongEmailPass).Once()

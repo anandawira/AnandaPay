@@ -1,7 +1,6 @@
 package usecase
 
 import (
-	"context"
 	"errors"
 	"testing"
 
@@ -29,7 +28,6 @@ func (ts *UserUsecaseTestSuite) TestRegister() {
 	ts.T().Run("It should return true if user added to the database successfully.", func(t *testing.T) {
 		ts.mockRepo.On(
 			"Insert",
-			mock.Anything,
 			mock.AnythingOfType("string"),
 			mock.AnythingOfType("string"),
 			mock.AnythingOfType("string"),
@@ -37,7 +35,6 @@ func (ts *UserUsecaseTestSuite) TestRegister() {
 		).Return(nil).Once()
 
 		err := ts.usecase.Register(
-			context.TODO(),
 			"fullname1",
 			"useremail@gmail.com",
 			"password",
@@ -50,7 +47,6 @@ func (ts *UserUsecaseTestSuite) TestRegister() {
 	ts.T().Run("It should return false if email already exist.", func(t *testing.T) {
 		ts.mockRepo.On(
 			"Insert",
-			mock.Anything,
 			mock.AnythingOfType("string"),
 			mock.AnythingOfType("string"),
 			mock.AnythingOfType("string"),
@@ -58,7 +54,6 @@ func (ts *UserUsecaseTestSuite) TestRegister() {
 		).Return(errors.New("Duplicate email address")).Once()
 
 		err := ts.usecase.Register(
-			context.TODO(),
 			"fullname2",
 			"duplicate@gmail.com",
 			"password2",
@@ -83,11 +78,10 @@ func (ts *UserUsecaseTestSuite) TestLogin() {
 
 		ts.mockRepo.On(
 			"GetByEmail",
-			mock.Anything,
 			mock.AnythingOfType("string"),
 		).Return(user, nil).Once()
 
-		userLogin, token, err := ts.usecase.Login(context.TODO(), "email", plainPassword)
+		userLogin, token, err := ts.usecase.Login("email", plainPassword)
 		require.NoError(t, err)
 		assert.Equal(t, user, userLogin)
 		assert.NotEqual(t, "", token)
@@ -96,11 +90,10 @@ func (ts *UserUsecaseTestSuite) TestLogin() {
 	ts.T().Run("It should return error if email not found", func(t *testing.T) {
 		ts.mockRepo.On(
 			"GetByEmail",
-			mock.Anything,
 			mock.AnythingOfType("string"),
 		).Return(domain.User{}, nil).Once()
 
-		_, _, err := ts.usecase.Login(context.TODO(), "email", plainPassword)
+		_, _, err := ts.usecase.Login("email", plainPassword)
 		assert.Error(t, err)
 	})
 
@@ -115,11 +108,10 @@ func (ts *UserUsecaseTestSuite) TestLogin() {
 
 		ts.mockRepo.On(
 			"GetByEmail",
-			mock.Anything,
 			mock.AnythingOfType("string"),
 		).Return(user, nil).Once()
 
-		_, _, err := ts.usecase.Login(context.TODO(), "email", "anotherPassword")
+		_, _, err := ts.usecase.Login("email", "anotherPassword")
 		assert.Error(t, err)
 	})
 }
