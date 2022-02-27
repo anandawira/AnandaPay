@@ -16,4 +16,5 @@ var (
 	ErrEmailNotFound       = errors.New("email not found")
 	ErrWrongEmailPass      = errors.New("incorrect email or password")
 	ErrParameterValidation = errors.New("parameter validation failed")
+	ErrInvalidToken        = errors.New("jwt authentication token invalid")
 )

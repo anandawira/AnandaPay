@@ -15,6 +15,7 @@ type User struct {
 type UserUsecase interface {
 	Register(fullname, email, plainPassword string) error
 	Login(email, plainPassword string) (User, string, error)
+	VerifyToken(tokenString string) (int, error)
 }
 
 type UserRepository interface {
