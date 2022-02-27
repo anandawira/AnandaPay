@@ -48,6 +48,6 @@ func TestAuthenticate(t *testing.T) {
 
 		Authenticate(c)
 
-		helper.AssertResponse(t, http.StatusUnauthorized, gin.H{"message": domain.ErrInvalidToken}, rec)
+		helper.AssertResponse(t, http.StatusUnauthorized, gin.H{"message": domain.ErrInvalidToken.Error()}, rec)
 	})
 }
