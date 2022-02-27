@@ -48,7 +48,7 @@ func (m *userRepository) Insert(fullname, email, hashedPassword string, isVerifi
 }
 
 func (m *userRepository) GetByEmail(email string) (user domain.User, err error) {
-	result := m.db.Where("email = ?", email).First(&user)
+	result := m.db.Select("id", "full_name", "email", "hashed_password").Where("email = ?", email).First(&user)
 	err = result.Error
 	return user, err
 }
