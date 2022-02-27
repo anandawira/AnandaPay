@@ -19,7 +19,7 @@ func Connect() *gorm.DB {
 		log.Fatal(err.Error())
 	}
 
-	db.AutoMigrate(&domain.User{})
+	db.AutoMigrate(&domain.User{}, &domain.Wallet{})
 
 	DB = db
 	return DB

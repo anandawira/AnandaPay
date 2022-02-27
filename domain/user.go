@@ -6,10 +6,10 @@ import (
 
 type User struct {
 	gorm.Model
-	FullName       string `json:"fullname" gorm:"not null"`
-	Email          string `json:"email" gorm:"unique;not null"`
-	HashedPassword string `json:"password" gorm:"not null"`
-	IsVerified     bool   `json:"isVerified" gorm:"not null"`
+	FullName       string `gorm:"not null"`
+	Email          string `gorm:"unique;not null"`
+	HashedPassword string `gorm:"not null"`
+	IsVerified     bool   `gorm:"not null"`
 }
 
 type UserUsecase interface {

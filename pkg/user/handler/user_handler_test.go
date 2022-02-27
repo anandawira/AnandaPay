@@ -1,17 +1,13 @@
 package handler
 
 import (
-	"encoding/json"
 	"net/http"
-	"net/http/httptest"
-	"net/url"
-	"strings"
 	"testing"
 
 	"github.com/anandawira/anandapay/domain"
+	"github.com/anandawira/anandapay/pkg/helper"
 	"github.com/anandawira/anandapay/pkg/user/usecase"
 	"github.com/gin-gonic/gin"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 )
@@ -30,34 +26,6 @@ func (ts *UserHandlerTestSuite) SetupSuite() {
 	gin.SetMode(gin.TestMode)
 }
 
-func createPostContext(body map[string]string) (*gin.Context, *httptest.ResponseRecorder) {
-	form := url.Values{}
-	for key, val := range body {
-		form.Set(key, val)
-	}
-
-	req := httptest.NewRequest("POST", "/users", strings.NewReader(form.Encode()))
-	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
-	rec := httptest.NewRecorder()
-	c, _ := gin.CreateTestContext(rec)
-	c.Request = req
-	return c, rec
-}
-
-func assertResponse(t testing.TB, code int, body gin.H, recorder *httptest.ResponseRecorder) {
-	t.Helper()
-
-	want, err := json.Marshal(body)
-	if err != nil {
-		t.Fatalf(err.Error())
-	}
-
-	got := recorder.Body.Bytes()
-
-	assert.Equal(t, code, recorder.Code, "http status code not equal")
-	assert.Equal(t, want, got, "response body not equal")
-}
-
 func (ts *UserHandlerTestSuite) TestRegister() {
 	body := map[string]string{
 		"fullname": "testname",
@@ -72,19 +40,19 @@ func (ts *UserHandlerTestSuite) TestRegister() {
 			mock.AnythingOfType("string"),
 		).Return(nil).Once()
 
-		c, rec := createPostContext(body)
+		c, rec := helper.CreatePostContext(body)
 
 		ts.handler.RegisterPost(c)
 
-		assertResponse(t, http.StatusOK, gin.H{"message": "User registered to the database successfully."}, rec)
+		helper.AssertResponse(t, http.StatusOK, gin.H{"message": "User registered to the database successfully."}, rec)
 	})
 
 	ts.T().Run("It should return with StatusBadRequest on invalid input", func(t *testing.T) {
-		c, rec := createPostContext(map[string]string{})
+		c, rec := helper.CreatePostContext(map[string]string{})
 
 		ts.handler.RegisterPost(c)
 
-		assertResponse(t, http.StatusBadRequest, gin.H{"message": domain.ErrParameterValidation.Error()}, rec)
+		helper.AssertResponse(t, http.StatusBadRequest, gin.H{"message": domain.ErrParameterValidation.Error()}, rec)
 	})
 
 	ts.T().Run("It should return with StatusBadRequest on duplicate email", func(t *testing.T) {
@@ -95,11 +63,11 @@ func (ts *UserHandlerTestSuite) TestRegister() {
 			mock.AnythingOfType("string"),
 		).Return(domain.ErrEmailUsed).Once()
 
-		c, rec := createPostContext(body)
+		c, rec := helper.CreatePostContext(body)
 
 		ts.handler.RegisterPost(c)
 
-		assertResponse(t, http.StatusBadRequest, gin.H{"message": domain.ErrEmailUsed.Error()}, rec)
+		helper.AssertResponse(t, http.StatusBadRequest, gin.H{"message": domain.ErrEmailUsed.Error()}, rec)
 	})
 }
 
@@ -121,7 +89,7 @@ func (ts *UserHandlerTestSuite) TestLogin() {
 			mock.AnythingOfType("string"),
 		).Return(user, "token", nil).Once()
 
-		c, rec := createPostContext(body)
+		c, rec := helper.CreatePostContext(body)
 
 		ts.handler.LoginPost(c)
 
@@ -134,15 +102,15 @@ func (ts *UserHandlerTestSuite) TestLogin() {
 				AccessToken: "token",
 			},
 		}
-		assertResponse(t, http.StatusOK, body, rec)
+		helper.AssertResponse(t, http.StatusOK, body, rec)
 	})
 
 	ts.T().Run("It should return with StatusBadRequest on invalid input", func(t *testing.T) {
-		c, rec := createPostContext(map[string]string{})
+		c, rec := helper.CreatePostContext(map[string]string{})
 
 		ts.handler.LoginPost(c)
 
-		assertResponse(t, http.StatusBadRequest, gin.H{"message": domain.ErrParameterValidation.Error()}, rec)
+		helper.AssertResponse(t, http.StatusBadRequest, gin.H{"message": domain.ErrParameterValidation.Error()}, rec)
 	})
 
 	ts.T().Run("It should return with StatusBadRequest on wrong email or password", func(t *testing.T) {
@@ -152,11 +120,11 @@ func (ts *UserHandlerTestSuite) TestLogin() {
 			mock.AnythingOfType("string"),
 		).Return(user, "", domain.ErrWrongEmailPass).Once()
 
-		c, rec := createPostContext(body)
+		c, rec := helper.CreatePostContext(body)
 
 		ts.handler.LoginPost(c)
 
-		assertResponse(t, http.StatusBadRequest, gin.H{"message": domain.ErrWrongEmailPass.Error()}, rec)
+		helper.AssertResponse(t, http.StatusBadRequest, gin.H{"message": domain.ErrWrongEmailPass.Error()}, rec)
 	})
 }
 
