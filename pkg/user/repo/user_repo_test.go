@@ -33,8 +33,8 @@ func (ts *UserRepoTestSuite) SetupSuite() {
 }
 
 func (ts *UserRepoTestSuite) SetupTest() {
-	ts.DB.Migrator().DropTable(&domain.User{})
-	ts.DB.AutoMigrate(&domain.User{})
+	ts.DB.Migrator().DropTable(&domain.User{}, &domain.Wallet{})
+	ts.DB.AutoMigrate(&domain.User{}, &domain.Wallet{})
 }
 
 func (ts *UserRepoTestSuite) TearDownSuite() {
