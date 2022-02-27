@@ -18,8 +18,3 @@ func (m *MockUserUsecase) Login(email string, plainPassword string) (domain.User
 	args := m.Called(email, plainPassword)
 	return args.Get(0).(domain.User), args.String(1), args.Error(2)
 }
-
-func (m *MockUserUsecase) VerifyToken(tokenString string) (int, error) {
-	args := m.Called(tokenString)
-	return args.Int(0), args.Error(1)
-}
