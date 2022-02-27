@@ -13,7 +13,7 @@ func Authenticate(c *gin.Context) {
 	authHeader := c.GetHeader("Authorization")
 	if len(authHeader) <= len(BEARER_PREFIX) {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-			"message": domain.ErrInvalidToken,
+			"message": domain.ErrInvalidToken.Error(),
 		})
 		return
 	}
@@ -23,7 +23,7 @@ func Authenticate(c *gin.Context) {
 	id, err := helper.VerifyToken(tokenString)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-			"message": err,
+			"message": domain.ErrInvalidToken.Error(),
 		})
 		return
 	}
