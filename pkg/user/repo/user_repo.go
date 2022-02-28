@@ -47,8 +47,17 @@ func (m *userRepository) Insert(fullname, email, hashedPassword string, isVerifi
 	return nil
 }
 
-func (m *userRepository) GetByEmail(email string) (user domain.User, err error) {
-	result := m.db.Where("email = ?", email).First(&user)
-	err = result.Error
-	return user, err
+func (m *userRepository) GetByEmail(email string) (user domain.User, wallet domain.Wallet, err error) {
+
+	result := m.db.Select("id", "full_name", "email", "hashed_password").Where("email = ?", email).First(&user)
+	if result.Error != nil {
+		return domain.User{}, domain.Wallet{}, domain.ErrEmailNotFound
+	}
+
+	result = m.db.Select("id", "user_id").Where("user_id = ?", user.ID).First(&wallet)
+	if result.Error != nil {
+		return domain.User{}, domain.Wallet{}, domain.ErrWalletNotFound
+	}
+
+	return user, wallet, nil
 }

@@ -51,7 +51,7 @@ func (h *UserHandler) LoginPost(c *gin.Context) {
 		return
 	}
 
-	user, token, err := h.userUsecase.Login(reqBody.Email, reqBody.Password)
+	user, wallet, token, err := h.userUsecase.Login(reqBody.Email, reqBody.Password)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
@@ -60,7 +60,8 @@ func (h *UserHandler) LoginPost(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"message": "User logged in successfully.",
 			"data": LoginResponseData{
-				Id:          user.ID,
+				UserID:      user.ID,
+				WalletID:    wallet.ID,
 				Fullname:    user.FullName,
 				Email:       user.Email,
 				AccessToken: token,

@@ -14,7 +14,7 @@ func (m *MockUserRepo) Insert(fullname, email, hashedPassword string, isVerified
 	return args.Error(0)
 }
 
-func (m *MockUserRepo) GetByEmail(email string) (user domain.User, err error) {
+func (m *MockUserRepo) GetByEmail(email string) (user domain.User, wallet domain.Wallet, err error) {
 	args := m.Called(email)
-	return args.Get(0).(domain.User), args.Error(1)
+	return args.Get(0).(domain.User), args.Get(1).(domain.Wallet), args.Error(2)
 }

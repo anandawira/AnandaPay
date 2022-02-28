@@ -33,23 +33,26 @@ func (m *userUsecase) Register(fullname, email, plainPassword string) error {
 	return nil
 }
 
-func (m *userUsecase) Login(email string, plainPassword string) (domain.User, string, error) {
-	user, err := m.userRepo.GetByEmail(email)
+func (m *userUsecase) Login(email string, plainPassword string) (domain.User, domain.Wallet, string, error) {
+	user, wallet, err := m.userRepo.GetByEmail(email)
 	if err != nil {
-		return user, "", domain.ErrWrongEmailPass
+		return user, wallet, "", domain.ErrWrongEmailPass
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(user.HashedPassword), []byte(plainPassword))
 	if err != nil {
-		return user, "", domain.ErrWrongEmailPass
+		return user, wallet, "", domain.ErrWrongEmailPass
 	}
 
 	// Hardcode, later change to env
 	var secretKey string = "secret"
 
-	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
-		Issuer:    strconv.Itoa(int(user.ID)),
-		ExpiresAt: time.Now().Add(12 * time.Hour).Unix(),
+	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, domain.CustomJwtClaim{
+		StandardClaims: jwt.StandardClaims{
+			Issuer:    strconv.Itoa(int(user.ID)),
+			ExpiresAt: time.Now().Add(12 * time.Hour).Unix(),
+		},
+		WalletID: wallet.ID,
 	})
 
 	token, err := claims.SignedString([]byte(secretKey))
@@ -57,5 +60,5 @@ func (m *userUsecase) Login(email string, plainPassword string) (domain.User, st
 		log.Fatal("JWT token generation failed.", err.Error())
 	}
 
-	return user, token, nil
+	return user, wallet, token, nil
 }
