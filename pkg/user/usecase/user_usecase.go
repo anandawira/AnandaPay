@@ -12,11 +12,10 @@ import (
 
 type userUsecase struct {
 	userRepo       domain.UserRepository
-	contextTimeout time.Duration
 }
 
-func NewUserUsecase(repo domain.UserRepository, timeout time.Duration) domain.UserUsecase {
-	return &userUsecase{userRepo: repo, contextTimeout: timeout}
+func NewUserUsecase(repo domain.UserRepository) domain.UserUsecase {
+	return &userUsecase{userRepo: repo}
 }
 
 func (m *userUsecase) Register(fullname, email, plainPassword string) error {
