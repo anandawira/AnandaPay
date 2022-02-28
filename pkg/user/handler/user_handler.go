@@ -4,14 +4,19 @@ import (
 	"net/http"
 
 	"github.com/anandawira/anandapay/domain"
+	"github.com/anandawira/anandapay/pkg/user/repo"
+	"github.com/anandawira/anandapay/pkg/user/usecase"
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 type UserHandler struct {
 	userUsecase domain.UserUsecase
 }
 
-func AttachHandler(g *gin.Engine, usecase domain.UserUsecase) {
+func AttachHandler(g *gin.Engine, db *gorm.DB) {
+	repo := repo.NewUserRepository(db)
+	usecase := usecase.NewUserUsecase(repo)
 	handler := &UserHandler{
 		userUsecase: usecase,
 	}

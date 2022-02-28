@@ -25,6 +25,14 @@ func CreatePostContext(body map[string]string) (*gin.Context, *httptest.Response
 	return c, rec
 }
 
+func CreateGetContext() (*gin.Context, *httptest.ResponseRecorder) {
+	req := httptest.NewRequest("GET", "/", nil)
+	rec := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(rec)
+	c.Request = req
+	return c, rec
+}
+
 func AssertResponse(t testing.TB, code int, body gin.H, recorder *httptest.ResponseRecorder) {
 	t.Helper()
 
