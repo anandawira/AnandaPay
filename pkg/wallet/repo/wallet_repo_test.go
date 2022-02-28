@@ -34,6 +34,8 @@ func (ts *WalletRepoTestSuite) SetupSuite() {
 
 	ts.DB = db
 	ts.repo = NewWalletRepository(db)
+	ts.DB.Migrator().DropTable(&domain.User{}, &domain.Wallet{})
+	ts.DB.AutoMigrate(&domain.User{}, &domain.Wallet{})
 
 	userRepo := repo.NewUserRepository(db)
 	err = userRepo.Insert(
@@ -66,11 +68,6 @@ func (ts *WalletRepoTestSuite) SetupSuite() {
 	}
 }
 
-func (ts *WalletRepoTestSuite) SetupTest() {
-	ts.DB.Migrator().DropTable(&domain.User{}, &domain.Wallet{})
-	// ts.DB.AutoMigrate(&domain.User{}, &domain.Wallet{})
-}
-
 func (ts *WalletRepoTestSuite) TearDownSuite() {
 	conn, err := ts.DB.DB()
 	if err != nil {
@@ -80,10 +77,15 @@ func (ts *WalletRepoTestSuite) TearDownSuite() {
 }
 
 func (ts *WalletRepoTestSuite) TestGetBalance() {
-	ts.T().Run("It should return balance and error nil on record found", func(t *testing.T) {
+	ts.T().Run("It should return balance and error nil on wallet found", func(t *testing.T) {
 		balance, err := ts.repo.GetBalance(ts.wallet1.ID)
 		require.NoError(t, err)
 		assert.Equal(t, ts.wallet1.Balance, balance)
+	})
+
+	ts.T().Run("It should return error on wallet not found", func(t *testing.T) {
+		_, err := ts.repo.GetBalance("invalid id")
+		require.Error(t, err)
 	})
 }
 
