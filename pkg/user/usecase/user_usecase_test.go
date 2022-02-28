@@ -21,7 +21,7 @@ type UserUsecaseTestSuite struct {
 
 func (ts *UserUsecaseTestSuite) SetupSuite() {
 	ts.mockRepo = new(repo.MockUserRepo)
-	ts.usecase = NewUserUsecase(ts.mockRepo, 5)
+	ts.usecase = NewUserUsecase(ts.mockRepo)
 }
 
 func (ts *UserUsecaseTestSuite) TestRegister() {
