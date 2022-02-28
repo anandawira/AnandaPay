@@ -8,8 +8,8 @@ import (
 	"github.com/golang-jwt/jwt"
 )
 
-func VerifyToken(tokenString string) (int, error) {
-	token, err := jwt.ParseWithClaims(tokenString, &jwt.StandardClaims{}, func(t *jwt.Token) (interface{}, error) {
+func VerifyToken(tokenString string) (int, string, error) {
+	token, err := jwt.ParseWithClaims(tokenString, &domain.CustomJwtClaim{}, func(t *jwt.Token) (interface{}, error) {
 		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, domain.ErrInvalidToken
 		}
@@ -19,16 +19,17 @@ func VerifyToken(tokenString string) (int, error) {
 	})
 
 	if err != nil {
-		return 0, domain.ErrInvalidToken
+		return 0, "", domain.ErrInvalidToken
 	}
 
-	if claims, ok := token.Claims.(*jwt.StandardClaims); ok && token.Valid {
-		id, err := strconv.Atoi(claims.Issuer)
+	if claims, ok := token.Claims.(*domain.CustomJwtClaim); ok && token.Valid {
+		userId, err := strconv.Atoi(claims.Issuer)
 		if err != nil {
 			log.Fatal(domain.ErrInternalServerError)
 		}
-		return id, nil
+		walletId := claims.WalletID
+		return userId, walletId, nil
 	} else {
-		return 0, domain.ErrInvalidToken
+		return 0, "", domain.ErrInvalidToken
 	}
 }

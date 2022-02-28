@@ -12,7 +12,8 @@ type LoginRequest struct {
 }
 
 type LoginResponseData struct {
-	Id          uint   `json:"id"`
+	UserID      uint   `json:"user_id"`
+	WalletID    string `json:"wallet_id"`
 	Fullname    string `json:"fullname"`
 	Email       string `json:"email"`
 	AccessToken string `json:"access_token"`

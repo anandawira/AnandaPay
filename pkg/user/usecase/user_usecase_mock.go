@@ -14,7 +14,7 @@ func (m *MockUserUsecase) Register(fullname, email, plainPassword string) error 
 	return args.Error(0)
 }
 
-func (m *MockUserUsecase) Login(email string, plainPassword string) (domain.User, string, error) {
+func (m *MockUserUsecase) Login(email string, plainPassword string) (domain.User, domain.Wallet, string, error) {
 	args := m.Called(email, plainPassword)
-	return args.Get(0).(domain.User), args.String(1), args.Error(2)
+	return args.Get(0).(domain.User), args.Get(1).(domain.Wallet), args.String(2), args.Error(3)
 }

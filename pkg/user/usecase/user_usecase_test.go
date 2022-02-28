@@ -76,14 +76,21 @@ func (ts *UserUsecaseTestSuite) TestLogin() {
 			IsVerified:     false,
 		}
 
+		wallet := domain.Wallet{
+			ID:     "wallet id",
+			UserID: user.ID,
+		}
+
 		ts.mockRepo.On(
 			"GetByEmail",
 			mock.AnythingOfType("string"),
-		).Return(user, nil).Once()
+		).Return(user, wallet, nil).Once()
 
-		userLogin, token, err := ts.usecase.Login("email", plainPassword)
+		userLogin, userWallet, token, err := ts.usecase.Login("email", plainPassword)
 		require.NoError(t, err)
 		assert.Equal(t, user, userLogin)
+		assert.Equal(t, wallet, userWallet)
+		assert.Equal(t, userLogin.ID, userWallet.UserID)
 		assert.NotEqual(t, "", token)
 	})
 
@@ -91,9 +98,9 @@ func (ts *UserUsecaseTestSuite) TestLogin() {
 		ts.mockRepo.On(
 			"GetByEmail",
 			mock.AnythingOfType("string"),
-		).Return(domain.User{}, nil).Once()
+		).Return(domain.User{}, domain.Wallet{}, nil).Once()
 
-		_, _, err := ts.usecase.Login("email", plainPassword)
+		_, _, _, err := ts.usecase.Login("email", plainPassword)
 		assert.Error(t, err)
 	})
 
@@ -109,9 +116,9 @@ func (ts *UserUsecaseTestSuite) TestLogin() {
 		ts.mockRepo.On(
 			"GetByEmail",
 			mock.AnythingOfType("string"),
-		).Return(user, nil).Once()
+		).Return(user, domain.Wallet{}, nil).Once()
 
-		_, _, err := ts.usecase.Login("email", "anotherPassword")
+		_, _, _, err := ts.usecase.Login("email", "anotherPassword")
 		assert.Error(t, err)
 	})
 }

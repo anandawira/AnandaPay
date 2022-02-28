@@ -17,11 +17,15 @@ import (
 func TestAuthenticate(t *testing.T) {
 	// Hardcode, later change to env
 	var secretKey string = "secret"
-	const id int = 1
+	const userId int = 1
+	const walletId string = "wallet id"
 	t.Run("It should add userId to context on valid token", func(t *testing.T) {
-		claims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
-			Issuer:    strconv.Itoa(id),
-			ExpiresAt: time.Now().Add(12 * time.Hour).Unix(),
+		claims := jwt.NewWithClaims(jwt.SigningMethodHS256, domain.CustomJwtClaim{
+			StandardClaims: jwt.StandardClaims{
+				Issuer:    strconv.Itoa(userId),
+				ExpiresAt: time.Now().Add(12 * time.Hour).Unix(),
+			},
+			WalletID: walletId,
 		})
 
 		validToken, err := claims.SignedString([]byte(secretKey))
@@ -37,7 +41,8 @@ func TestAuthenticate(t *testing.T) {
 
 		Authenticate(c)
 
-		assert.Equal(t, id, c.GetInt("userId"))
+		assert.Equal(t, userId, c.GetInt("userId"))
+		assert.Equal(t, walletId, c.GetString("walletId"))
 	})
 	t.Run("It should return StatusStatusUnauthorized on invalid token", func(t *testing.T) {
 		req := httptest.NewRequest("POST", "/", nil)

@@ -93,14 +93,15 @@ func (ts *UserRepoTestSuite) TestGetOne() {
 		err := ts.repo.Insert(user.FullName, user.Email, user.HashedPassword, user.IsVerified)
 		require.NoError(t, err)
 
-		result, err := ts.repo.GetByEmail(user.Email)
+		resUser, wallet, err := ts.repo.GetByEmail(user.Email)
 		require.NoError(t, err)
-		assert.Equal(t, user.Email, result.Email)
-		assert.Equal(t, user.HashedPassword, result.HashedPassword)
+		assert.Equal(t, user.Email, resUser.Email)
+		assert.Equal(t, user.HashedPassword, resUser.HashedPassword)
+		assert.Equal(t, resUser.ID, wallet.UserID)
 	})
 
 	ts.T().Run("It should return error if record not found", func(t *testing.T) {
-		_, err := ts.repo.GetByEmail("noemail@gmail.com")
+		_, _, err := ts.repo.GetByEmail("noemail@gmail.com")
 		assert.Error(t, err)
 	})
 }

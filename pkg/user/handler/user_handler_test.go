@@ -77,6 +77,11 @@ func (ts *UserHandlerTestSuite) TestLogin() {
 		Email:    "test@gmail.com",
 	}
 
+	wallet := domain.Wallet{
+		ID:     "wallet id",
+		UserID: user.ID,
+	}
+
 	body := map[string]string{
 		"email":    user.Email,
 		"password": "testpassword",
@@ -87,7 +92,7 @@ func (ts *UserHandlerTestSuite) TestLogin() {
 			"Login",
 			mock.AnythingOfType("string"),
 			mock.AnythingOfType("string"),
-		).Return(user, "token", nil).Once()
+		).Return(user, wallet, "token", nil).Once()
 
 		c, rec := helper.CreatePostContext(body)
 
@@ -96,7 +101,8 @@ func (ts *UserHandlerTestSuite) TestLogin() {
 		body := gin.H{
 			"message": "User logged in successfully.",
 			"data": LoginResponseData{
-				Id:          0,
+				UserID:      0,
+				WalletID:    wallet.ID,
 				Fullname:    user.FullName,
 				Email:       user.Email,
 				AccessToken: "token",
@@ -118,7 +124,7 @@ func (ts *UserHandlerTestSuite) TestLogin() {
 			"Login",
 			mock.AnythingOfType("string"),
 			mock.AnythingOfType("string"),
-		).Return(user, "", domain.ErrWrongEmailPass).Once()
+		).Return(user, wallet, "", domain.ErrWrongEmailPass).Once()
 
 		c, rec := helper.CreatePostContext(body)
 

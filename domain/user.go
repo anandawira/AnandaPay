@@ -14,10 +14,10 @@ type User struct {
 
 type UserUsecase interface {
 	Register(fullname, email, plainPassword string) error
-	Login(email, plainPassword string) (User, string, error)
+	Login(email, plainPassword string) (User, Wallet, string, error)
 }
 
 type UserRepository interface {
 	Insert(fullname, email, hashedPassword string, isVerified bool) error
-	GetByEmail(email string) (User, error)
+	GetByEmail(email string) (User, Wallet, error)
 }
