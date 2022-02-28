@@ -1,5 +1,6 @@
 package handler
 
 type BalanceResponseData struct {
-	Balance int64 `json:"balance"`
+	WalletID string `json:"wallet_id,omitempty"`
+	Balance  int64  `json:"balance,omitempty"`
 }

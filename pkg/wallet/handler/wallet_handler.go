@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/anandawira/anandapay/domain"
+	"github.com/anandawira/anandapay/pkg/user/middleware"
 	"github.com/anandawira/anandapay/pkg/wallet/repo"
 	"github.com/anandawira/anandapay/pkg/wallet/usecase"
 	"github.com/gin-gonic/gin"
@@ -20,7 +21,9 @@ func AttachHandler(g *gin.Engine, db *gorm.DB) {
 	handler := &WalletHandler{
 		walletUsecase: usecase,
 	}
-	g.GET("/balance", handler.BalanceGet)
+
+	wallet := g.Group("/wallet", middleware.Authenticate)
+	wallet.GET("/balance", handler.BalanceGet)
 }
 
 func (h *WalletHandler) BalanceGet(c *gin.Context) {
@@ -37,7 +40,8 @@ func (h *WalletHandler) BalanceGet(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Wallet balance retrieved successfully.",
 		"data": BalanceResponseData{
-			Balance: balance,
+			WalletID: walletId,
+			Balance:  balance,
 		},
 	})
 }
