@@ -14,7 +14,12 @@ func NewWalletRepository(db *gorm.DB) domain.WalletRepository {
 }
 
 func (m *walletRepository) GetBalance(walletId string) (int64, error) {
-	panic("not implemented") // TODO: Implement
+	wallet := domain.Wallet{}
+
+	result := m.db.Select("balance").Where("id = ?", walletId).First(&wallet)
+	if result.Error != nil {
+		return int64(0), domain.ErrWalletNotFound
+	}
+
+	return wallet.Balance, nil
 }
-
-
