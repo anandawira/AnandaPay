@@ -34,7 +34,8 @@ func (ts *WalletRepoTestSuite) SetupSuite() {
 
 	ts.DB = db
 	ts.repo = NewWalletRepository(db)
-	ts.DB.AutoMigrate(&domain.User{}, &domain.Wallet{})
+	ts.DB.Migrator().DropTable(&domain.User{}, &domain.Wallet{})
+	ts.DB.AutoMigrate(&domain.User{}, &domain.Wallet{}, &domain.Transaction{})
 
 	userRepo := repo.NewUserRepository(db)
 	err = userRepo.Insert(

@@ -1,7 +1,10 @@
 package repo
 
 import (
+	"time"
+
 	"github.com/anandawira/anandapay/domain"
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -31,10 +34,34 @@ func (m *walletRepository) TopUp(walletId string, amount uint32) error {
 		return domain.ErrWalletNotFound
 	}
 
-	result = m.db.Model(&wallet).Update("balance", gorm.Expr("balance + ?", amount))
-	if result.Error != nil {
-		return domain.ErrInternalServerError
+	transaction := domain.Transaction{
+		ID:              uuid.NewString(),
+		TransactionTime: time.Now(),
+		CreditedWallet:  walletId,
+		Notes:           "Free top up",
+		Amount:          uint64(amount),
 	}
 
+	err := m.db.Transaction(func(tx *gorm.DB) error {
+		result := m.db.Create(&transaction)
+		if result.Error != nil {
+			return result.Error
+		}
+
+		result = m.db.Model(&wallet).Update("balance", gorm.Expr("balance + ?", amount))
+		if result.Error != nil {
+			return domain.ErrInternalServerError
+		}
+
+		if result.RowsAffected == 0 {
+			return domain.ErrInternalServerError
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		return domain.ErrInternalServerError
+	}
 	return nil
 }
