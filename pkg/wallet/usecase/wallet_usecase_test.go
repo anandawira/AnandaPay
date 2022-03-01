@@ -45,6 +45,30 @@ func (ts *WalletUsecaseTestSuite) TestGetBalance() {
 	})
 }
 
+func (ts *WalletUsecaseTestSuite) TestTopUp() {
+	ts.T().Run("It should return no error on wallet found", func(t *testing.T) {
+		ts.mockRepo.On(
+			"TopUp",
+			mock.AnythingOfType("string"),
+			mock.AnythingOfType("uint32"),
+		).Return(nil).Once()
+
+		err := ts.usecase.TopUp("wallet id", 500000)
+		assert.NoError(t, err)
+	})
+
+	ts.T().Run("It should return error on wallet not found", func(t *testing.T) {
+		ts.mockRepo.On(
+			"TopUp",
+			mock.AnythingOfType("string"),
+			mock.AnythingOfType("uint32"),
+		).Return(domain.ErrWalletNotFound).Once()
+
+		err := ts.usecase.TopUp("wallet id", 500000)
+		assert.Error(t, err)
+	})
+}
+
 func TestSuite(t *testing.T) {
 	suite.Run(t, new(WalletUsecaseTestSuite))
 }

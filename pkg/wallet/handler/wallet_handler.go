@@ -24,6 +24,7 @@ func AttachHandler(g *gin.Engine, db *gorm.DB) {
 
 	wallet := g.Group("/wallet", middleware.Authenticate)
 	wallet.GET("/balance", handler.BalanceGet)
+	wallet.POST("/topup", handler.TopUpPost)
 }
 
 func (h *WalletHandler) BalanceGet(c *gin.Context) {
@@ -43,5 +44,31 @@ func (h *WalletHandler) BalanceGet(c *gin.Context) {
 			WalletID: walletId,
 			Balance:  balance,
 		},
+	})
+}
+
+func (h *WalletHandler) TopUpPost(c *gin.Context) {
+	reqBody := TopupRequestData{}
+	err := c.ShouldBind(&reqBody)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": domain.ErrParameterValidation.Error(),
+		})
+		return
+	}
+
+	walletId := c.GetString("walletId")
+	amount := reqBody.Amount
+
+	err = h.walletUsecase.TopUp(walletId, amount)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Wallet balance top up success.",
 	})
 }

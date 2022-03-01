@@ -59,6 +59,39 @@ func (ts *WalletHandlerTestSuite) TestGetBalance() {
 	})
 }
 
+func (ts *WalletHandlerTestSuite) TestTopUp() {
+	ts.T().Run("It should return with StatusOK on success top up", func(t *testing.T) {
+		ts.MockWalletUsecase.On(
+			"TopUp",
+			mock.AnythingOfType("string"),
+			mock.AnythingOfType("uint32"),
+		).Return(nil)
+
+		body := map[string]string{
+			"amount": "5000000",
+		}
+
+		c, rec := helper.CreatePostContext(body)
+
+		ts.handler.TopUpPost(c)
+		helper.AssertResponse(t, http.StatusOK, gin.H{
+			"message": "Wallet balance top up success.",
+		}, rec)
+	})
+
+	ts.T().Run("It should return error on bad request body", func(t *testing.T) {
+		body := map[string]string{
+			"amount": "dddddd",
+		}
+		c, rec := helper.CreatePostContext(body)
+
+		ts.handler.TopUpPost(c)
+		helper.AssertResponse(t, http.StatusBadRequest, gin.H{
+			"message": domain.ErrParameterValidation.Error(),
+		}, rec)
+	})
+}
+
 func TestSuite(t *testing.T) {
 	suite.Run(t, new(WalletHandlerTestSuite))
 }
