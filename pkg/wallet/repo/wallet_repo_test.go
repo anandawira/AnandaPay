@@ -25,7 +25,7 @@ type WalletRepoTestSuite struct {
 
 func (ts *WalletRepoTestSuite) SetupSuite() {
 	// Hardcore, later change to env variable
-	dsn := "root:example@tcp(127.0.0.1:3306)/anandapay-test?charset=utf8mb4&parseTime=True&loc=Local"
+	dsn := "root:example@tcp(127.0.0.1:3306)/anandapay-test-wallet?charset=utf8mb4&parseTime=True&loc=Local"
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 
 	if err != nil {
@@ -34,7 +34,6 @@ func (ts *WalletRepoTestSuite) SetupSuite() {
 
 	ts.DB = db
 	ts.repo = NewWalletRepository(db)
-	ts.DB.Migrator().DropTable(&domain.User{}, &domain.Wallet{})
 	ts.DB.AutoMigrate(&domain.User{}, &domain.Wallet{})
 
 	userRepo := repo.NewUserRepository(db)
@@ -69,6 +68,7 @@ func (ts *WalletRepoTestSuite) SetupSuite() {
 }
 
 func (ts *WalletRepoTestSuite) TearDownSuite() {
+	ts.DB.Migrator().DropTable(&domain.User{}, &domain.Wallet{})
 	conn, err := ts.DB.DB()
 	if err != nil {
 		log.Fatal("Database not found")

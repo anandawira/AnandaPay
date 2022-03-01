@@ -21,7 +21,7 @@ type UserRepoTestSuite struct {
 
 func (ts *UserRepoTestSuite) SetupSuite() {
 	// Hardcore, later change to env variable
-	dsn := "root:example@tcp(127.0.0.1:3306)/anandapay-test?charset=utf8mb4&parseTime=True&loc=Local"
+	dsn := "root:example@tcp(127.0.0.1:3306)/anandapay-test-user?charset=utf8mb4&parseTime=True&loc=Local"
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 
 	if err != nil {
@@ -33,8 +33,11 @@ func (ts *UserRepoTestSuite) SetupSuite() {
 }
 
 func (ts *UserRepoTestSuite) SetupTest() {
-	ts.DB.Migrator().DropTable(&domain.User{}, &domain.Wallet{})
 	ts.DB.AutoMigrate(&domain.User{}, &domain.Wallet{})
+}
+
+func (ts *UserRepoTestSuite) TearDownTest() {
+	ts.DB.Migrator().DropTable(&domain.User{}, &domain.Wallet{})
 }
 
 func (ts *UserRepoTestSuite) TearDownSuite() {
