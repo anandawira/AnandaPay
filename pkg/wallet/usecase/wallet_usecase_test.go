@@ -31,7 +31,7 @@ func (ts *WalletUsecaseTestSuite) TestGetBalance() {
 
 		balance, err := ts.usecase.GetBalance("walletId1")
 		assert.NoError(t, err)
-		assert.Equal(t, int64(12), balance)
+		assert.Equal(t, uint64(12), balance)
 	})
 
 	ts.T().Run("It should return error if wallet not found", func(t *testing.T) {

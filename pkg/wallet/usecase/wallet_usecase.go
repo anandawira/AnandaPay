@@ -10,6 +10,6 @@ func NewWalletUsecase(repo domain.WalletRepository) domain.WalletUsecase {
 	return &walletUsecase{walletRepo: repo}
 }
 
-func (m *walletUsecase) GetBalance(walletId string) (int64, error) {
+func (m *walletUsecase) GetBalance(walletId string) (uint64, error) {
 	return m.walletRepo.GetBalance(walletId)
 }
