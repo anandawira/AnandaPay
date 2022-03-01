@@ -6,7 +6,12 @@ type MockWalletRepo struct {
 	mock.Mock
 }
 
-func (m *MockWalletRepo) GetBalance(walletId string) (int64, error) {
+func (m *MockWalletRepo) GetBalance(walletId string) (uint64, error) {
 	args := m.Called(walletId)
-	return int64(args.Int(0)), args.Error(1)
+	return uint64(args.Int(0)), args.Error(1)
+}
+
+func (m *MockWalletRepo) TopUp(walletId string, amount uint32) error {
+	args := m.Called(walletId, amount)
+	return args.Error(0)
 }
