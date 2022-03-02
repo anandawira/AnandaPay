@@ -28,10 +28,6 @@ func (m *walletRepository) GetBalance(walletId string) (uint64, error) {
 
 func (m *walletRepository) TopUp(transactionId string, transactionTime time.Time, creditedWallet string, notes string, amount uint32) error {
 	wallet := domain.Wallet{}
-	result := m.db.Where("id = ?", creditedWallet).Take(&wallet)
-	if result.Error != nil {
-		return domain.ErrWalletNotFound
-	}
 
 	transaction := domain.Transaction{
 		ID:              transactionId,
