@@ -43,7 +43,7 @@ func (m *walletRepository) TopUp(transactionId string, transactionTime time.Time
 			return result.Error
 		}
 
-		result = m.db.Model(&wallet).Update("balance", gorm.Expr("balance + ?", amount))
+		result = m.db.Model(&wallet).Where("id = ?", creditedWallet).Update("balance", gorm.Expr("balance + ?", amount))
 		if result.Error != nil {
 			return domain.ErrInternalServerError
 		}
