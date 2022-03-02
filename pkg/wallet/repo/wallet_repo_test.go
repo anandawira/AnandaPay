@@ -3,9 +3,11 @@ package repo
 import (
 	"log"
 	"testing"
+	"time"
 
 	"github.com/anandawira/anandapay/domain"
 	"github.com/anandawira/anandapay/pkg/user/repo"
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
@@ -97,7 +99,7 @@ func (ts *WalletRepoTestSuite) TestTopUp() {
 		require.NoError(t, err)
 		expectedBalance := initialBalance + TOPUP_AMOUNT
 
-		err = ts.repo.TopUp(ts.wallet1.ID, TOPUP_AMOUNT)
+		err = ts.repo.TopUp(uuid.NewString(), time.Now(), ts.wallet1.ID, "notes", TOPUP_AMOUNT)
 		require.NoError(t, err)
 
 		gotBalance, err := ts.repo.GetBalance(ts.wallet1.ID)
@@ -106,7 +108,7 @@ func (ts *WalletRepoTestSuite) TestTopUp() {
 	})
 
 	ts.T().Run("It should return error on wallet not found", func(t *testing.T) {
-		err := ts.repo.TopUp("invalid id", TOPUP_AMOUNT)
+		err := ts.repo.TopUp(uuid.NewString(), time.Now(), "invalid id", "notes", TOPUP_AMOUNT)
 		assert.Error(t, err)
 	})
 }

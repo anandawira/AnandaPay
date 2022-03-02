@@ -30,5 +30,5 @@ type WalletUsecase interface {
 
 type WalletRepository interface {
 	GetBalance(walletId string) (uint64, error)
-	TopUp(walletId string, amount uint32) error
+	TopUp(transactionId string, transactionTime time.Time, creditedWallet string, notes string, amount uint32) error
 }

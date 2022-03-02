@@ -1,6 +1,11 @@
 package usecase
 
-import "github.com/anandawira/anandapay/domain"
+import (
+	"time"
+
+	"github.com/anandawira/anandapay/domain"
+	"github.com/google/uuid"
+)
 
 type walletUsecase struct {
 	walletRepo domain.WalletRepository
@@ -15,5 +20,11 @@ func (m *walletUsecase) GetBalance(walletId string) (uint64, error) {
 }
 
 func (m *walletUsecase) TopUp(walletId string, amount uint32) error {
-	return m.walletRepo.TopUp(walletId, amount)
+	return m.walletRepo.TopUp(
+		uuid.NewString(),
+		time.Now(),
+		walletId,
+		"Free top up",
+		amount,
+	)
 }

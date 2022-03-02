@@ -4,7 +4,6 @@ import (
 	"time"
 
 	"github.com/anandawira/anandapay/domain"
-	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -27,18 +26,18 @@ func (m *walletRepository) GetBalance(walletId string) (uint64, error) {
 	return wallet.Balance, nil
 }
 
-func (m *walletRepository) TopUp(walletId string, amount uint32) error {
+func (m *walletRepository) TopUp(transactionId string, transactionTime time.Time, creditedWallet string, notes string, amount uint32) error {
 	wallet := domain.Wallet{}
-	result := m.db.Where("id = ?", walletId).Take(&wallet)
+	result := m.db.Where("id = ?", creditedWallet).Take(&wallet)
 	if result.Error != nil {
 		return domain.ErrWalletNotFound
 	}
 
 	transaction := domain.Transaction{
-		ID:              uuid.NewString(),
-		TransactionTime: time.Now(),
-		CreditedWallet:  walletId,
-		Notes:           "Free top up",
+		ID:              transactionId,
+		TransactionTime: transactionTime,
+		CreditedWallet:  creditedWallet,
+		Notes:           notes,
 		Amount:          uint64(amount),
 	}
 

@@ -50,6 +50,9 @@ func (ts *WalletUsecaseTestSuite) TestTopUp() {
 		ts.mockRepo.On(
 			"TopUp",
 			mock.AnythingOfType("string"),
+			mock.AnythingOfType("Time"),
+			mock.AnythingOfType("string"),
+			mock.AnythingOfType("string"),
 			mock.AnythingOfType("uint32"),
 		).Return(nil).Once()
 
@@ -60,6 +63,9 @@ func (ts *WalletUsecaseTestSuite) TestTopUp() {
 	ts.T().Run("It should return error on wallet not found", func(t *testing.T) {
 		ts.mockRepo.On(
 			"TopUp",
+			mock.AnythingOfType("string"),
+			mock.AnythingOfType("Time"),
+			mock.AnythingOfType("string"),
 			mock.AnythingOfType("string"),
 			mock.AnythingOfType("uint32"),
 		).Return(domain.ErrWalletNotFound).Once()
