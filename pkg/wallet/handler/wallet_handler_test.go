@@ -3,6 +3,7 @@ package handler
 import (
 	"net/http"
 	"testing"
+	"time"
 
 	"github.com/anandawira/anandapay/domain"
 	"github.com/anandawira/anandapay/pkg/helper"
@@ -61,11 +62,20 @@ func (ts *WalletHandlerTestSuite) TestGetBalance() {
 
 func (ts *WalletHandlerTestSuite) TestTopUp() {
 	ts.T().Run("It should return with StatusOK on success top up", func(t *testing.T) {
+		transaction := domain.Transaction{
+			ID:              "id",
+			TransactionTime: time.Now(),
+			TransactionType: domain.TYPE_TOPUP,
+			CreditedWallet:  "credited wallet",
+			DebitedWallet:   "",
+			Notes:           "topup",
+			Amount:          100000,
+		}
 		ts.MockWalletUsecase.On(
 			"TopUp",
 			mock.AnythingOfType("string"),
 			mock.AnythingOfType("uint32"),
-		).Return(nil)
+		).Return(transaction, nil)
 
 		body := map[string]string{
 			"amount": "5000000",
@@ -76,6 +86,9 @@ func (ts *WalletHandlerTestSuite) TestTopUp() {
 		ts.handler.TopUpPost(c)
 		helper.AssertResponse(t, http.StatusOK, gin.H{
 			"message": "Wallet balance top up success.",
+			"data": TopupResponseData{
+				Transaction: transaction,
+			},
 		}, rec)
 	})
 

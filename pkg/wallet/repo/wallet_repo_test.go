@@ -92,27 +92,6 @@ func (ts *WalletRepoTestSuite) TestGetBalance() {
 	})
 }
 
-func (ts *WalletRepoTestSuite) TestTopUp() {
-	const TOPUP_AMOUNT = 5000000
-	ts.T().Run("It should add balance and return error nil on wallet found", func(t *testing.T) {
-		initialBalance, err := ts.repo.GetBalance(ts.wallet1.ID)
-		require.NoError(t, err)
-		expectedBalance := initialBalance + TOPUP_AMOUNT
-
-		err = ts.repo.TopUp(uuid.NewString(), time.Now(), ts.wallet1.ID, "notes", TOPUP_AMOUNT)
-		require.NoError(t, err)
-
-		gotBalance, err := ts.repo.GetBalance(ts.wallet1.ID)
-		require.NoError(t, err)
-		assert.Equal(t, expectedBalance, gotBalance)
-	})
-
-	ts.T().Run("It should return error on wallet not found", func(t *testing.T) {
-		err := ts.repo.TopUp(uuid.NewString(), time.Now(), "invalid id", "notes", TOPUP_AMOUNT)
-		assert.Error(t, err)
-	})
-}
-
 func (ts *WalletRepoTestSuite) TestTransaction() {
 	const TOPUP_AMOUNT = 5000000
 	const TRANSFER_AMOUNT = 100000

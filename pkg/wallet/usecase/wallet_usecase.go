@@ -19,12 +19,16 @@ func (m *walletUsecase) GetBalance(walletId string) (uint64, error) {
 	return m.walletRepo.GetBalance(walletId)
 }
 
-func (m *walletUsecase) TopUp(walletId string, amount uint32) error {
-	return m.walletRepo.TopUp(
+func (m *walletUsecase) TopUp(walletId string, amount uint32) (domain.Transaction, error) {
+	transaction, err := m.walletRepo.Transaction(
 		uuid.NewString(),
 		time.Now(),
+		domain.TYPE_TOPUP,
 		walletId,
+		"",
 		"Free top up",
 		amount,
 	)
+
+	return transaction, err
 }

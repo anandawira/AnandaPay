@@ -16,11 +16,7 @@ func (m *MockWalletRepo) GetBalance(walletId string) (uint64, error) {
 	return uint64(args.Int(0)), args.Error(1)
 }
 
-func (m *MockWalletRepo) TopUp(transactionId string, transactionTime time.Time, creditedWallet string, notes string, amount uint32) error {
-	args := m.Called(transactionId, transactionTime, creditedWallet, notes, amount)
-	return args.Error(0)
-}
-
 func (m *MockWalletRepo) Transaction(transactionId string, transactionTime time.Time, transactionType string, creditedWallet string, debitedWallet string, notes string, amount uint32) (domain.Transaction, error) {
-	panic("not implemented") // TODO: Implement
+	args := m.Called(transactionId, transactionTime, transactionType, creditedWallet, debitedWallet, notes, amount)
+	return args.Get(0).(domain.Transaction), args.Error(1)
 }

@@ -60,7 +60,7 @@ func (h *WalletHandler) TopUpPost(c *gin.Context) {
 	walletId := c.GetString("walletId")
 	amount := reqBody.Amount
 
-	err = h.walletUsecase.TopUp(walletId, amount)
+	transaction, err := h.walletUsecase.TopUp(walletId, amount)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
@@ -70,5 +70,8 @@ func (h *WalletHandler) TopUpPost(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Wallet balance top up success.",
+		"data": TopupResponseData{
+			Transaction: transaction,
+		},
 	})
 }
