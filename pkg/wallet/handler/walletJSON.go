@@ -14,3 +14,9 @@ type TopupRequestData struct {
 type TopupResponseData struct {
 	domain.Transaction
 }
+
+type TransferRequestData struct {
+	ReceiverID string `form:"receiver_id" binding:"required"`
+	Amount     uint32  `form:"amount" binding:"required"`
+	Notes      string `form:"notes" binding:"required"`
+}
