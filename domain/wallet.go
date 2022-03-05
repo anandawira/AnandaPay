@@ -1,6 +1,8 @@
 package domain
 
-import "time"
+import (
+	"time"
+)
 
 type Wallet struct {
 	ID      string `gorm:"primarykey"`
@@ -17,6 +19,7 @@ const (
 type Transaction struct {
 	ID              string `gorm:"primarykey"`
 	TransactionTime time.Time
+	TransactionType string
 	CreditedWallet  string
 	DebitedWallet   string
 	Notes           string
@@ -31,4 +34,5 @@ type WalletUsecase interface {
 type WalletRepository interface {
 	GetBalance(walletId string) (uint64, error)
 	TopUp(transactionId string, transactionTime time.Time, creditedWallet string, notes string, amount uint32) error
+	Transaction(transactionId string, transactionTime time.Time, transactionType string, creditedWallet string, debitedWallet string, notes string, amount uint32) (Transaction, error)
 }
