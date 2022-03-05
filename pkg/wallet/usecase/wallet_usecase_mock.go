@@ -18,3 +18,8 @@ func (m *MockWalletUsecase) TopUp(walletId string, amount uint32) (domain.Transa
 	args := m.Called(walletId, amount)
 	return args.Get(0).(domain.Transaction), args.Error(1)
 }
+
+func (m *MockWalletUsecase) Transfer(senderId string, receiverId string, notes string, amount uint32) (domain.Transaction, error) {
+	args := m.Called(senderId, receiverId, notes, amount)
+	return args.Get(0).(domain.Transaction), args.Error(1)
+}

@@ -29,6 +29,7 @@ type Transaction struct {
 type WalletUsecase interface {
 	GetBalance(walletId string) (uint64, error)
 	TopUp(walletId string, amount uint32) (Transaction, error)
+	Transfer(senderId string, receiverId string, notes string, amount uint32) (Transaction, error)
 }
 
 type WalletRepository interface {

@@ -52,7 +52,7 @@ func (ts *WalletUsecaseTestSuite) TestTopUp() {
 	const AMOUNT = 500000
 	ts.T().Run("It should return no error on wallet found", func(t *testing.T) {
 		want := domain.Transaction{
-			ID:              WALLET_ID,
+			ID:              "id",
 			TransactionTime: time.Now(),
 			TransactionType: domain.TYPE_TOPUP,
 			CreditedWallet:  WALLET_ID,
@@ -89,6 +89,54 @@ func (ts *WalletUsecaseTestSuite) TestTopUp() {
 		).Return(domain.Transaction{}, domain.ErrWalletNotFound).Once()
 
 		_, err := ts.usecase.TopUp("wallet id", 500000)
+		assert.Error(t, err)
+	})
+}
+
+func (ts *WalletUsecaseTestSuite) TestTransfer() {
+	const WALLET_ID1 = "wallet id 1"
+	const WALLET_ID2 = "wallet id 2"
+	const AMOUNT = 500000
+	ts.T().Run("It should return no error on wallet found", func(t *testing.T) {
+		want := domain.Transaction{
+			ID:              "id",
+			TransactionTime: time.Now(),
+			TransactionType: domain.TYPE_TRANSFER,
+			CreditedWallet:  WALLET_ID1,
+			DebitedWallet:   WALLET_ID2,
+			Notes:           "Transfer note",
+			Amount:          AMOUNT,
+		}
+
+		ts.mockRepo.On(
+			"Transaction",
+			mock.AnythingOfType("string"),
+			mock.AnythingOfType("Time"),
+			mock.AnythingOfType("string"),
+			mock.AnythingOfType("string"),
+			mock.AnythingOfType("string"),
+			mock.AnythingOfType("string"),
+			mock.AnythingOfType("uint32"),
+		).Return(want, nil).Once()
+
+		got, err := ts.usecase.Transfer(WALLET_ID1, WALLET_ID2, "", AMOUNT)
+		require.NoError(t, err)
+		assert.Equal(t, want, got)
+	})
+
+	ts.T().Run("It should return error on wallet not found", func(t *testing.T) {
+		ts.mockRepo.On(
+			"Transaction",
+			mock.AnythingOfType("string"),
+			mock.AnythingOfType("Time"),
+			mock.AnythingOfType("string"),
+			mock.AnythingOfType("string"),
+			mock.AnythingOfType("string"),
+			mock.AnythingOfType("string"),
+			mock.AnythingOfType("uint32"),
+		).Return(domain.Transaction{}, domain.ErrWalletNotFound).Once()
+
+		_, err := ts.usecase.Transfer(WALLET_ID1, "invalid wallet", "", AMOUNT)
 		assert.Error(t, err)
 	})
 }

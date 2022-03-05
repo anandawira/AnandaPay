@@ -32,3 +32,21 @@ func (m *walletUsecase) TopUp(walletId string, amount uint32) (domain.Transactio
 
 	return transaction, err
 }
+
+func (m *walletUsecase) Transfer(senderId string, receiverId string, notes string, amount uint32) (domain.Transaction, error) {
+	if receiverId == senderId {
+		return domain.Transaction{}, domain.ErrSendToOwn
+	}
+
+	transaction, err := m.walletRepo.Transaction(
+		uuid.NewString(),
+		time.Now(),
+		domain.TYPE_TRANSFER,
+		receiverId,
+		senderId,
+		notes,
+		amount,
+	)
+
+	return transaction, err
+}
