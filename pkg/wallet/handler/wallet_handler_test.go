@@ -3,6 +3,7 @@ package handler
 import (
 	"net/http"
 	"testing"
+	"time"
 
 	"github.com/anandawira/anandapay/domain"
 	"github.com/anandawira/anandapay/pkg/helper"
@@ -61,11 +62,20 @@ func (ts *WalletHandlerTestSuite) TestGetBalance() {
 
 func (ts *WalletHandlerTestSuite) TestTopUp() {
 	ts.T().Run("It should return with StatusOK on success top up", func(t *testing.T) {
+		transaction := domain.Transaction{
+			ID:              "id",
+			TransactionTime: time.Now(),
+			TransactionType: domain.TYPE_TOPUP,
+			CreditedWallet:  "credited wallet",
+			DebitedWallet:   "",
+			Notes:           "topup",
+			Amount:          100000,
+		}
 		ts.MockWalletUsecase.On(
 			"TopUp",
 			mock.AnythingOfType("string"),
 			mock.AnythingOfType("uint32"),
-		).Return(nil)
+		).Return(transaction, nil).Once()
 
 		body := map[string]string{
 			"amount": "5000000",
@@ -76,6 +86,9 @@ func (ts *WalletHandlerTestSuite) TestTopUp() {
 		ts.handler.TopUpPost(c)
 		helper.AssertResponse(t, http.StatusOK, gin.H{
 			"message": "Wallet balance top up success.",
+			"data": TopupResponseData{
+				Transaction: transaction,
+			},
 		}, rec)
 	})
 
@@ -86,6 +99,78 @@ func (ts *WalletHandlerTestSuite) TestTopUp() {
 		c, rec := helper.CreatePostContext(body)
 
 		ts.handler.TopUpPost(c)
+		helper.AssertResponse(t, http.StatusBadRequest, gin.H{
+			"message": domain.ErrParameterValidation.Error(),
+		}, rec)
+	})
+}
+
+func (ts *WalletHandlerTestSuite) TestTransfer() {
+	ts.T().Run("It should return with StatusOK and transaction data on no error", func(t *testing.T) {
+		transaction := domain.Transaction{
+			ID:              "id",
+			TransactionTime: time.Now(),
+			TransactionType: domain.TYPE_TRANSFER,
+			CreditedWallet:  "credited wallet",
+			DebitedWallet:   "debited wallet",
+			Notes:           "notes",
+			Amount:          100000,
+		}
+		ts.MockWalletUsecase.On(
+			"Transfer",
+			mock.AnythingOfType("string"),
+			mock.AnythingOfType("string"),
+			mock.AnythingOfType("string"),
+			mock.AnythingOfType("uint32"),
+		).Return(transaction, nil).Once()
+
+		body := map[string]string{
+			"receiver_id": "receiver id",
+			"notes":       "notes",
+			"amount":      "5000000",
+		}
+
+		c, rec := helper.CreatePostContext(body)
+
+		ts.handler.TransferPost(c)
+		helper.AssertResponse(t, http.StatusOK, gin.H{
+			"message": "Transfer success.",
+			"data": TopupResponseData{
+				Transaction: transaction,
+			},
+		}, rec)
+	})
+
+	ts.T().Run("It should return with StatusBadRequest on error", func(t *testing.T) {
+		ts.MockWalletUsecase.On(
+			"Transfer",
+			mock.AnythingOfType("string"),
+			mock.AnythingOfType("string"),
+			mock.AnythingOfType("string"),
+			mock.AnythingOfType("uint32"),
+		).Return(domain.Transaction{}, domain.ErrInsufficientBalance).Once()
+
+		body := map[string]string{
+			"receiver_id": "receiver id",
+			"notes":       "notes",
+			"amount":      "5000000",
+		}
+
+		c, rec := helper.CreatePostContext(body)
+
+		ts.handler.TransferPost(c)
+		helper.AssertResponse(t, http.StatusBadRequest, gin.H{
+			"message": domain.ErrInsufficientBalance.Error(),
+		}, rec)
+	})
+
+	ts.T().Run("It should return error on bad request body", func(t *testing.T) {
+		body := map[string]string{
+			"amount": "dddddd",
+		}
+		c, rec := helper.CreatePostContext(body)
+
+		ts.handler.TransferPost(c)
 		helper.AssertResponse(t, http.StatusBadRequest, gin.H{
 			"message": domain.ErrParameterValidation.Error(),
 		}, rec)

@@ -3,9 +3,11 @@ package repo
 import (
 	"log"
 	"testing"
+	"time"
 
 	"github.com/anandawira/anandapay/domain"
 	"github.com/anandawira/anandapay/pkg/user/repo"
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
@@ -90,14 +92,15 @@ func (ts *WalletRepoTestSuite) TestGetBalance() {
 	})
 }
 
-func (ts *WalletRepoTestSuite) TestTopUp() {
+func (ts *WalletRepoTestSuite) TestTransaction() {
 	const TOPUP_AMOUNT = 5000000
-	ts.T().Run("It should add balance and return error nil on wallet found", func(t *testing.T) {
+	const TRANSFER_AMOUNT = 100000
+	ts.T().Run("It should add balance and return error nil on topup and wallet found", func(t *testing.T) {
 		initialBalance, err := ts.repo.GetBalance(ts.wallet1.ID)
 		require.NoError(t, err)
 		expectedBalance := initialBalance + TOPUP_AMOUNT
 
-		err = ts.repo.TopUp(ts.wallet1.ID, TOPUP_AMOUNT)
+		_, err = ts.repo.Transaction(uuid.NewString(), time.Now(), domain.TYPE_TOPUP, ts.wallet1.ID, "", "Free topup", TOPUP_AMOUNT)
 		require.NoError(t, err)
 
 		gotBalance, err := ts.repo.GetBalance(ts.wallet1.ID)
@@ -106,11 +109,44 @@ func (ts *WalletRepoTestSuite) TestTopUp() {
 	})
 
 	ts.T().Run("It should return error on wallet not found", func(t *testing.T) {
-		err := ts.repo.TopUp("invalid id", TOPUP_AMOUNT)
+		_, err := ts.repo.Transaction(uuid.NewString(), time.Now(), domain.TYPE_TOPUP, "invalid id", "", "Free topup", TOPUP_AMOUNT)
 		assert.Error(t, err)
+	})
+
+	ts.T().Run("It should return error on insufficient fund", func(t *testing.T) {
+		ts.UpdateWallets()
+
+		_, err := ts.repo.Transaction(uuid.NewString(), time.Now(), domain.TYPE_TRANSFER, ts.wallet2.ID, ts.wallet1.ID, "Transfer", uint32(ts.wallet1.Balance)+1)
+		require.Error(t, err)
+	})
+
+	ts.T().Run("It should transfer balance and return no error on sufficient fund", func(t *testing.T) {
+		ts.UpdateWallets()
+
+		wallet1ExpectedBalance := ts.wallet1.Balance - TRANSFER_AMOUNT
+		totalBalance := ts.wallet1.Balance + ts.wallet2.Balance
+		_, err := ts.repo.Transaction(uuid.NewString(), time.Now(), domain.TYPE_TRANSFER, ts.wallet2.ID, ts.wallet1.ID, "Transfer", TRANSFER_AMOUNT)
+		require.NoError(t, err)
+
+		ts.UpdateWallets()
+		assert.Equal(t, wallet1ExpectedBalance, ts.wallet1.Balance)
+		assert.Equal(t, totalBalance, ts.wallet1.Balance+ts.wallet2.Balance)
 	})
 }
 
+func (ts *WalletRepoTestSuite) UpdateWallets() {
+	wallet1Balance, err := ts.repo.GetBalance(ts.wallet1.ID)
+	if err != nil {
+		log.Fatal(err)
+	}
+	ts.wallet1.Balance = wallet1Balance
+
+	wallet2Balance, err := ts.repo.GetBalance(ts.wallet2.ID)
+	if err != nil {
+		log.Fatal(err)
+	}
+	ts.wallet2.Balance = wallet2Balance
+}
 func TestSuite(t *testing.T) {
 	suite.Run(t, new(WalletRepoTestSuite))
 }

@@ -1,6 +1,9 @@
 package usecase
 
-import "github.com/stretchr/testify/mock"
+import (
+	"github.com/anandawira/anandapay/domain"
+	"github.com/stretchr/testify/mock"
+)
 
 type MockWalletUsecase struct {
 	mock.Mock
@@ -11,7 +14,12 @@ func (m *MockWalletUsecase) GetBalance(walletId string) (uint64, error) {
 	return uint64(args.Int(0)), args.Error(1)
 }
 
-func (m *MockWalletUsecase) TopUp(walletId string, amount uint32) error {
+func (m *MockWalletUsecase) TopUp(walletId string, amount uint32) (domain.Transaction, error) {
 	args := m.Called(walletId, amount)
-	return args.Error(0)
+	return args.Get(0).(domain.Transaction), args.Error(1)
+}
+
+func (m *MockWalletUsecase) Transfer(senderId string, receiverId string, notes string, amount uint32) (domain.Transaction, error) {
+	args := m.Called(senderId, receiverId, notes, amount)
+	return args.Get(0).(domain.Transaction), args.Error(1)
 }

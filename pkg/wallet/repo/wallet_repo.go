@@ -4,7 +4,6 @@ import (
 	"time"
 
 	"github.com/anandawira/anandapay/domain"
-	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -27,41 +26,68 @@ func (m *walletRepository) GetBalance(walletId string) (uint64, error) {
 	return wallet.Balance, nil
 }
 
-func (m *walletRepository) TopUp(walletId string, amount uint32) error {
-	wallet := domain.Wallet{}
-	result := m.db.Where("id = ?", walletId).Take(&wallet)
-	if result.Error != nil {
-		return domain.ErrWalletNotFound
+func (m *walletRepository) Transaction(transactionId string, transactionTime time.Time, transactionType string, creditedWallet string, debitedWallet string, notes string, amount uint32) (domain.Transaction, error) {
+	if transactionType != domain.TYPE_TRANSFER && transactionType != domain.TYPE_TOPUP {
+		return domain.Transaction{}, domain.ErrInternalServerError
 	}
 
 	transaction := domain.Transaction{
-		ID:              uuid.NewString(),
-		TransactionTime: time.Now(),
-		CreditedWallet:  walletId,
-		Notes:           "Free top up",
+		ID:              transactionId,
+		TransactionTime: transactionTime,
+		TransactionType: transactionType,
+		CreditedWallet:  creditedWallet,
+		DebitedWallet:   debitedWallet,
+		Notes:           notes,
 		Amount:          uint64(amount),
 	}
 
 	err := m.db.Transaction(func(tx *gorm.DB) error {
-		result := m.db.Create(&transaction)
-		if result.Error != nil {
-			return result.Error
+		// If transfer, we want to check debitedWallet's balance first.
+		if transaction.TransactionType == domain.TYPE_TRANSFER {
+			wallet := domain.Wallet{}
+			result := m.db.Where("id = ?", transaction.DebitedWallet).Take(&wallet)
+			if result.Error != nil {
+				return domain.ErrWalletNotFound
+			}
+			if wallet.Balance < uint64(amount) {
+				return domain.ErrInsufficientBalance
+			}
 		}
 
-		result = m.db.Model(&wallet).Update("balance", gorm.Expr("balance + ?", amount))
+		// Add transaction
+		result := m.db.Create(&transaction)
+		if result.Error != nil {
+			return domain.ErrInternalServerError
+		}
+
+		// Add balance to credited wallet
+		result = m.db.Model(&domain.Wallet{}).Where("id = ?", creditedWallet).Update("balance", gorm.Expr("balance + ?", transaction.Amount))
 		if result.Error != nil {
 			return domain.ErrInternalServerError
 		}
 
 		if result.RowsAffected == 0 {
-			return domain.ErrInternalServerError
+			return domain.ErrWalletNotFound
+		}
+
+		// If type == transfer, remove balance from debited wallet
+		if transactionType == domain.TYPE_TRANSFER {
+			result = m.db.Model(&domain.Wallet{}).Where("id = ?", debitedWallet).Update("balance", gorm.Expr("balance - ?", transaction.Amount))
+			if result.Error != nil {
+				return domain.ErrInternalServerError
+			}
+
+			if result.RowsAffected == 0 {
+				return domain.ErrWalletNotFound
+			}
 		}
 
 		return nil
 	})
 
 	if err != nil {
-		return domain.ErrInternalServerError
+		return domain.Transaction{}, err
 	}
-	return nil
+
+	return transaction, nil
 }
